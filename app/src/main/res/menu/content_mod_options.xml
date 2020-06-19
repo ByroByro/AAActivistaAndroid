@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_approve"
+        android:orderInCategory="100"
+        android:title="Approve"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_disapprove"
+        android:orderInCategory="100"
+        android:title="Dispprove"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_delete"
+        android:orderInCategory="100"
+        android:title="Delete"
+        android:visible="false"
+        app:showAsAction="never" />
+</menu>

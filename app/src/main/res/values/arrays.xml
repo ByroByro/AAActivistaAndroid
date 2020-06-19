@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="gender">
+        <item>M</item>
+        <item>F</item>
+        <item>Missing</item>
+    </array>
+    <array name="mime_types">
+        <item>Image</item>
+        <item>Text</item>
+        <item>Video</item>
+        <item>Audio</item>
+    </array>
+    <array name="dummy_provinces">
+        <item>Manicaland</item>
+        <item>Midlands</item>
+        <item>Mashonaland East</item>
+        <item>Mashonaland West</item>
+        <item>Mashonaland Central</item>
+        <item>Masvingo</item>
+        <item>Matebeleland North</item>
+        <item>Matebeleland South</item>
+        <item>Harare</item>
+        <item>Bulawayo</item>
+    </array>
+    <array name="dummy_districts">
+        <item>Mbire</item>
+        <item>Kariba Rural</item>
+        <item>Nyanga</item>
+        <item>Mutasa</item>
+        <item>Chipinge</item>
+        <item>Makoni</item>
+    </array>
+
+    <array name="application_files">
+        <item>Cover Letter</item>
+        <item>Motivational Letter</item>
+        <item>Curriculum Vitae</item>
+    </array>
+
+    <array name="upload_lib_files_mime_types">
+        <item>Picture</item>
+        <item>Audio</item>
+        <item>Video</item>
+        <item>Document</item>
+    </array>
+
+    <array name="upload_lib_files_mime_types_v2">
+        <item>Document(pdf)</item>
+        <item>Document(word)</item>
+        <item>Document(power point)</item>
+        <item>Document(excel)</item>
+    </array>
+</resources>

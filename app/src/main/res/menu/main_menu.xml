@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_admin_login"
+        android:orderInCategory="100"
+        android:title="Admin Login"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_user_login"
+        android:orderInCategory="100"
+        android:title="User Login"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_application_approval"
+        android:orderInCategory="100"
+        android:visible="false"
+        android:title="Activista Approval"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_register"
+        android:orderInCategory="100"
+        android:title="Register"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_opportunities"
+        android:orderInCategory="100"
+        android:title="Opportunities"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_social_media"
+        android:orderInCategory="100"
+        android:title="Social Media"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_upload_library_material"
+        android:orderInCategory="100"
+        android:visible="false"
+        android:title="Upload Library Material"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_moderate_content"
+        android:orderInCategory="100"
+        android:visible="false"
+        android:title="Content Moderation"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_upload_opportunity"
+        android:orderInCategory="100"
+        android:visible="false"
+        android:title="Upload Opportunity"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_subscriber_monitor"
+        android:orderInCategory="100"
+        android:visible="false"
+        android:title="Subscriber Monitor"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_view_opportunity_applications"
+        android:orderInCategory="100"
+        android:visible="false"
+        android:title="Opportunity Applications"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+</menu>

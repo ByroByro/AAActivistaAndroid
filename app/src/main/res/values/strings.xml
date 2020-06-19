@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">Activista</string>
+    <string name="title_activity_main_bottom_nav">Main</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_activity_main_nav_drawer">Main</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+    <string name="menu_tools">Tools</string>
+    <string name="menu_share">Share</string>
+    <string name="menu_send">Send</string>
+
+    <string name="base_dir">/Activista</string>
+    <string name="images">/TempImage</string>
+    <string name="videos">/TempVideo</string>
+    <string name="audios">/TempAudio</string>
+    <string name="temp">/Temp</string>
+    <string name="downloads">/Downloads</string>
+    <string name="registration_app_bar_title">Registration</string>
+    <string name="feed_app_bar_title">Feed</string>
+    <string name="content_moderation_bar_title"></string>
+    <string name="library_app_bar_title">Library</string>
+    <string name="search_title">Search</string>
+    <string name="contacts_app_bar_title">Contacts</string>
+    <string name="upload_app_bar_title">Upload Activity</string>
+    <string name="opportunities_app_bar_title">Opportunities</string>
+    <string name="settings_app_bar_title">Settings</string>
+    <string name="account_req">Account/Registration required</string>
+    <string name="content_des">Image</string>
+    <string name="browser_intent">Open With</string>
+    <string name="facebook_link">https://www.facebook.com</string>
+    <string name="twitter_link">https://www.twitter.com</string>
+    <string name="instagram_link">https://www.instagram.com</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
