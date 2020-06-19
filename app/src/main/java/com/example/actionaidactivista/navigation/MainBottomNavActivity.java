@@ -12,6 +12,7 @@ import com.example.actionaidactivista.ActivityUploadActivity;
 import com.example.actionaidactivista.ContactFragment;
 import com.example.actionaidactivista.ContentModerationFragment;
 import com.example.actionaidactivista.FeedFragment;
+import com.example.actionaidactivista.GeoLocationActivity;
 import com.example.actionaidactivista.LibraryFragment;
 import com.example.actionaidactivista.OpportunitiesFragment;
 import com.example.actionaidactivista.R;
@@ -146,7 +147,8 @@ public class MainBottomNavActivity extends AppCompatActivity {
                 setFragment(contentModerationFragment);
                 break;
             case R.id.action_subscriber_monitor:
-                Toast.makeText(MainBottomNavActivity.this,"Monitor",Toast.LENGTH_SHORT).show();
+                Intent intent1 = new Intent(MainBottomNavActivity.this, GeoLocationActivity.class);
+                startActivity(intent1);
                 break;
             case R.id.action_view_opportunity_applications:
                 break;
