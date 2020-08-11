@@ -2,30 +2,47 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.actionaidactivista">
 
+    <uses-feature
+        android:name="android.hardware.Camera"
+        android:required="true" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission. ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/launcher_a"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/launcher_a"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".GeoLocationActivity"></activity>
+        <activity android:name=".EditProvDisActivity"></activity>
+        <activity android:name=".ReportedCommentsActivity" />
+        <activity android:name=".ReportCommentActivity" />
+        <activity android:name=".UpdateDOBBiographyActivity" />
+        <activity android:name=".PreviewOnlineDocActivity" />
+        <activity android:name=".FeedCommentsActivity" />
+        <activity android:name=".ViewAttachmentsActivity" />
+        <activity android:name=".CheckAccountActivity" />
+        <activity android:name=".PreviewDocActivity" />
+        <activity android:name=".ViewApplicationsActivity" />
+        <activity android:name=".OpportunityApplicationsActivity" />
+        <activity android:name=".ProfileActivity" />
+        <activity android:name=".FeedsMonitoringActivity" />
+        <activity android:name=".GeoLocationActivity" />
         <activity android:name=".UserAccountsActivity" />
         <activity android:name=".loginandsignup.UserLoginAndSignUpActivity" />
         <activity android:name=".loginandsignup.AdminLoginActivity" />
         <activity android:name=".UploadLibraryMaterialActivity" />
-        <activity android:name=".ApplyActivityActivity" />
+        <activity android:name=".ApplyOpportunityActivity" />
         <activity android:name=".SettingsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -49,6 +66,17 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".navigation.MainBottomNavActivity" />
         </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_path" />
+        </provider>
+
         <activity android:name=".MainActivity" />
     </application>
 

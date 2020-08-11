@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/opportunity_card_view"
     android:layout_width="match_parent"
@@ -21,11 +22,9 @@
             android:layout_marginStart="4dp"
             android:layout_marginTop="1dp"
             android:layout_marginBottom="1dp"
-            android:lines="1"
             android:text="Title"
             android:textColor="@android:color/black"
             android:textSize="15dp" />
-
 
         <TextView
             android:id="@+id/description"
@@ -39,11 +38,23 @@
             android:textColor="@android:color/black"
             android:textSize="15dp" />
 
+        <TextView
+            android:id="@+id/go_to_google_docs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="docs"
+            android:textColor="@android:color/black"
+            android:textSize="15dp"
+            android:visibility="gone" />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="2dp">
+            android:layout_marginTop="2dp"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/opportunity_details"
@@ -52,11 +63,11 @@
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="1dp"
                 android:layout_marginBottom="1dp"
-                android:background="@color/colorRed"
+                android:background="@color/colorWhite"
                 android:padding="4dp"
                 android:text="Details"
                 android:textAllCaps="false"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorRed"
                 android:textSize="20dp" />
 
             <Button
@@ -66,12 +77,28 @@
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="1dp"
                 android:layout_marginBottom="1dp"
-                android:background="@color/colorRed"
+                android:background="@color/colorWhite"
                 android:padding="4dp"
                 android:text="Apply"
                 android:textAllCaps="false"
-                android:textColor="@color/colorWhite"
+                android:textColor="@color/colorRed"
                 android:textSize="20dp" />
+
+            <Button
+                android:id="@+id/expired"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="1dp"
+                android:background="@color/colorWhite"
+                android:padding="4dp"
+                android:text="Closed"
+                android:textAllCaps="false"
+                android:textColor="@color/colorRed"
+                android:textSize="20dp"
+                android:visibility="gone" />
+
         </LinearLayout>
 
     </LinearLayout>

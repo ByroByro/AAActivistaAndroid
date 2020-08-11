@@ -21,8 +21,8 @@
             android:layout_marginStart="4dp"
             android:layout_marginTop="1dp"
             android:layout_marginBottom="1dp"
-            android:text="Title"
             android:lines="1"
+            android:text="Title"
             android:textColor="@android:color/black"
             android:textSize="15dp" />
 
@@ -34,24 +34,68 @@
             android:layout_marginStart="4dp"
             android:layout_marginTop="1dp"
             android:layout_marginBottom="1dp"
-            android:text="Author"
             android:lines="1"
+            android:text="Author"
             android:textColor="@android:color/black"
             android:textSize="15dp" />
 
         <Button
-            android:id="@+id/download"
+            android:id="@+id/download2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:layout_marginTop="1dp"
             android:layout_marginBottom="1dp"
-            android:text="Download"
-            android:padding="4dp"
-            android:textAllCaps="false"
             android:background="@color/colorRed"
+            android:padding="4dp"
+            android:text="Download"
+            android:visibility="gone"
+            android:textAllCaps="false"
             android:textColor="@color/colorWhite"
             android:textSize="18dp" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:text="Details"
+                android:textSize="20dp"
+                android:textColor="@color/colorRed"
+                android:id="@+id/details"
+                android:textAllCaps="false"
+                android:background="@color/colorWhite"
+                android:layout_marginRight="10dp"
+                android:textAlignment="center"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:text="Preview"
+                android:textSize="20dp"
+                android:textColor="@color/colorRed"
+                android:id="@+id/preview"
+                android:textAllCaps="false"
+                android:layout_toRightOf="@id/details"
+                android:background="@color/colorWhite"
+                android:layout_marginRight="10dp"
+                android:textAlignment="center"/>
+
+            <ImageButton
+                android:id="@+id/download"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="1dp"
+                android:background="@color/colorWhite"
+                android:padding="15dp"
+                android:layout_toRightOf="@id/preview"
+                android:src="@drawable/ic_file_download" />
+
+        </RelativeLayout>
 
     </LinearLayout>
 

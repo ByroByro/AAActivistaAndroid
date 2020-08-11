@@ -7,6 +7,15 @@ public class opportunity {
     private String mDateposted;
     private String mClosingdate;
     private String mLocation;
+    private String mDocsLink;
+
+    public String getmDocsLink() {
+        return mDocsLink;
+    }
+
+    public void setmDocsLink(String mDocsLink) {
+        this.mDocsLink = mDocsLink;
+    }
 
     public String getmDateposted() {
         return mDateposted;

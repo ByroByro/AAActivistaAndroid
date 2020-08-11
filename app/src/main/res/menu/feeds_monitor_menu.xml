@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_by_feeds_uploaded"
+        android:orderInCategory="100"
+        android:title="By no of activities initiated"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_by_feeds_tagged"
+        android:orderInCategory="100"
+        android:title="By no of activities participated"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_by_feeds_liking"
+        android:orderInCategory="100"
+        android:title="By no of likes on feeds"
+        app:showAsAction="never" />
+</menu>

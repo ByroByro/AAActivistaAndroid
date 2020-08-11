@@ -95,7 +95,8 @@ public class AdminLoginActivity extends AppCompatActivity {
                         if (message.equalsIgnoreCase("Invalid username or password")) {
                             methods.showAlert("Response", "Invalid username or password.", AdminLoginActivity.this);
                         } else if (message.equalsIgnoreCase("Success")) {
-                            methods.showAlert("Response", "Sign in successfull.", AdminLoginActivity.this);
+                            //methods.showAlert("Response", "Sign in successful.", AdminLoginActivity.this);
+                            Toast.makeText(AdminLoginActivity.this,"Login Successful",Toast.LENGTH_LONG).show();
                             String acc_type = tokens[1];
                             String user_id = tokens[2];
                             //create account prefs
@@ -110,6 +111,10 @@ public class AdminLoginActivity extends AppCompatActivity {
                             //clear edit texts
                             mUsername.setText("");
                             mPassword.setText("");
+                            //go to main dash
+                            Intent main = new Intent(AdminLoginActivity.this, MainBottomNavActivity.class);
+                            main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            AdminLoginActivity.this.startActivity(main);
                         } else if (message.equalsIgnoreCase("Error")) {
                             methods.showAlert("Response", "Server error.", AdminLoginActivity.this);
                         }

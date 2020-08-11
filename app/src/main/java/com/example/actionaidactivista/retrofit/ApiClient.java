@@ -13,7 +13,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiClient {
 
     //public static final String BASE_URL = "http://10.0.2.2:81/byro/retrofit/";
-    public static final String BASE_URL = hostserveraddress.BASE_URL();
+    //public static final String BASE_URL = hostserveraddress.BASE_URL();//hotspot
+    //public static final String BASE_URL = hostserveraddress.BASE_URL_2();//default for emulator
+    public static final String BASE_URL = hostserveraddress.BASE_SERVER_URL();//online server
     public static Retrofit retrofit = null;
 
     public static Retrofit getApiClient(){
@@ -21,9 +23,9 @@ public class ApiClient {
                 .setLenient()
                 .create();
         OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(5,TimeUnit.MINUTES)
-                .readTimeout(300,TimeUnit.SECONDS)
-                .writeTimeout(300,TimeUnit.SECONDS)
+                .connectTimeout(10,TimeUnit.MINUTES)
+                .readTimeout(30,TimeUnit.MINUTES)
+                .writeTimeout(30,TimeUnit.MINUTES)
                 .build();
 
         if(retrofit == null){

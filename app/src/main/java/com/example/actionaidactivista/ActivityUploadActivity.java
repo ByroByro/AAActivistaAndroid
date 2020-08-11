@@ -8,32 +8,54 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.OpenableColumns;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.actionaidactivista.adapters.feed_adapter;
+import com.example.actionaidactivista.models.feed;
 import com.example.actionaidactivista.navigation.MainBottomNavActivity;
 import com.example.actionaidactivista.retrofit.ApiClient;
 import com.example.actionaidactivista.retrofit.ApiInterface;
+import com.example.actionaidactivista.search.custom_search;
+import com.example.actionaidactivista.search.search_adapter;
+import com.example.actionaidactivista.search.search_model;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.gson.JsonParser;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,6 +63,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -56,7 +79,8 @@ public class ActivityUploadActivity extends Fragment {
 
     private EditText mDescriptionText, mFilename;
     private Button mDate;//button for date
-    private Button mPickMedia;//button for attaching media file
+    //private Button mPickMedia;//button for attaching media file
+    private ImageButton mPickMedia;//image button for picking media
     private Spinner mmimeType;//spinner for mime type
     private EditText mContent;//edit text for getting content if mime type is text
     private String mMimeType = "";
@@ -67,16 +91,20 @@ public class ActivityUploadActivity extends Fragment {
     final int FILE_SYSTEM = 100;
     private Uri mFilepathUri;
     private File file;
-    private boolean mIsImage, mIsAudio, mIsVideo;
-    Calendar calendar;
+    private Calendar calendar;
     int year, month, day;
-    DatePickerDialog datePickerDialog;
-    String mimeType = "";
-    String intType = "";
-    String fileType = "";
-    Dialog mDialog;
+    private DatePickerDialog datePickerDialog;
+    private String mimeType = "";
+    private String intType = "";
+    private String fileType = "";
+    private Dialog mDialog;
+    private Dialog dialog;
     private ApiInterface apiInterface;
-    SharedPreferences sharedPreferences;
+    private SharedPreferences sharedPreferences;
+    private ArrayList<String> mParticipants;
+    private search_adapter mAdapter;//search adapter
+    private List<search_model> list;//list of type model
+    private Spinner mActivityType;//activity type spinner
 
     public ActivityUploadActivity() {
         // Required empty public constructor
@@ -101,6 +129,7 @@ public class ActivityUploadActivity extends Fragment {
             mDate = (Button) root.findViewById(R.id.date);
             mDismiss = (Button) root.findViewById(R.id.dismiss);
             mTip = (CardView) root.findViewById(R.id.tip_card_view);
+            mActivityType = (Spinner) root.findViewById(R.id.activity_type);
             mDescriptionText = (EditText) root.findViewById(R.id.description);
             mLocation = (TextInputEditText) root.findViewById(R.id.location);
 
@@ -110,20 +139,36 @@ public class ActivityUploadActivity extends Fragment {
             sharedPreferences = getContext().getSharedPreferences(RegistrationActivity.ACC_PREFERENCES, Context.MODE_PRIVATE);
 
             mDialog = new Dialog(getContext());
+            dialog = new Dialog(getContext());
             apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
+
+            mParticipants = new ArrayList<>();
+
+            //make sure options menu for fragment shows
+            setHasOptionsMenu(true);
+
+            //get activity types
+            getActivityTypes();
 
             Button upload = (Button) root.findViewById(R.id.upload_activity);
             upload.setOnClickListener(v -> {
                 try {
-                    //check if person is registered
-                    //check if is admin
-                    if (methods.getUserAccountNo(getContext()).equalsIgnoreCase("admin")) {
-                        methods.showAlert("User only", "You are an admin.", getContext());
-                        return;
+
+                    String participants;
+                    //do participants logic
+                    if (mParticipants.size() > 0) {
+                        //activity has tagged participants
+                        //methods.showAlert("List", mParticipants.toString(), getContext());
+                        participants = mParticipants.toString();
+                    } else {
+                        //activity has no tagged participants
+                        //methods.showAlert("List", mParticipants.toString(), getContext());
+                        participants = "No tagged";
                     }
+                    //check if person is registered
                     //check if user is logged
                     if (!methods.checkUserValidity(getContext())) {
-                        methods.showAlert("User Account Required", "A valid user account is required.Sign in first.", getContext());
+                        methods.showAlert("User Account Required", "A valid user account is required.Sign in first.Or your account is admin.", getContext());
                         return;
                     }
                     String userid = "";
@@ -134,6 +179,12 @@ public class ActivityUploadActivity extends Fragment {
                     }
                     if (methods.getUserAccountNo(getContext()).equalsIgnoreCase("error")) {
                         methods.showAlert("Error", "An error occurred.", getContext());
+                        return;
+                    }
+
+                    //check if is admin
+                    if (methods.getUserAccountNo(getContext()).equalsIgnoreCase("admin")) {
+                        methods.showAlert("User only", "You are an admin.", getContext());
                         return;
                     }
 
@@ -148,7 +199,12 @@ public class ActivityUploadActivity extends Fragment {
                     String description = mDescriptionText.getText().toString().trim();
                     String location = mLocation.getText().toString().trim();
                     String date = mDate.getText().toString().trim();
-                    //String mimeType = mmimeType.getSelectedItem().toString();
+                    String type = mmimeType.getSelectedItem().toString();
+                    String activity_type = mActivityType.getSelectedItem().toString();
+                    if(mFilepathUri == null && !type.equalsIgnoreCase("text")){
+                        Toast.makeText(getContext(), "Select file", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     String content = "";
                     if (mmimeType.getSelectedItemId() == 1) {
                         fileType = "N/A";
@@ -165,7 +221,7 @@ public class ActivityUploadActivity extends Fragment {
                         mimeType = getContext().getContentResolver().getType(mFilepathUri);
                     }
 
-                    if(mmimeType.getSelectedItemId() == 1) {
+                    if (mmimeType.getSelectedItemId() == 1) {
                         if (description.equalsIgnoreCase("") || content.equalsIgnoreCase("")) {
                             methods.showAlert("Missing fields", "Enter all information.", getContext());
                             return;
@@ -180,11 +236,12 @@ public class ActivityUploadActivity extends Fragment {
                         methods.showAlert("Missing fields", "Enter location.", getContext());
                         return;
                     }
+
                     String dtePosted = methods.changeDateFormat(date);
                     if (mmimeType.getSelectedItemId() == 1) {
-                        postTextActivity(description, dtePosted, fileType, mimeType, intType, content, userid, accno,location,"N/A");
+                        postTextActivity(description, dtePosted, fileType, mimeType, intType, content, userid, accno, location, "N/A", participants,activity_type);
                     } else {
-                        postBinaryActivity(description,dtePosted,fileType,mimeType,intType,file,mFilepathUri,userid,accno,location,"N/A");
+                        postBinaryActivity(description, dtePosted, fileType, mimeType, intType, file, mFilepathUri, userid, accno, location, "N/A", participants,activity_type);
                     }
 
                 } catch (Exception e) {
@@ -221,17 +278,27 @@ public class ActivityUploadActivity extends Fragment {
                             fileType = "image";
                             intType = "1";
                         } else if (type.equalsIgnoreCase("audio")) {
-                            mMimeType = "audio/*";
+                            mMimeType = "audio/mp3";
                             fileType = "audio";
                             intType = "4";
+                            try {
+                                //Intent intent = new Intent(Intent.ACTION_GET_CONTENT, android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+                                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                                intent.setType("audio/*");
+                                startActivityForResult(Intent.createChooser(intent, "Select Audio"), FILE_SYSTEM);
+                            } catch (Exception e) {
+                                System.out.println(e);
+                            }
                         } else if (type.equalsIgnoreCase("video")) {
                             mMimeType = "video/*";
                             fileType = "video";
                             intType = "2";
                         }
-                        Intent intent = new Intent(Intent.ACTION_PICK);
-                        intent.setType(mMimeType);
-                        startActivityForResult(intent, FILE_SYSTEM);
+                        if (!fileType.equalsIgnoreCase("audio")) {
+                            Intent intent = new Intent(Intent.ACTION_PICK);
+                            intent.setType(mMimeType);
+                            startActivityForResult(intent, FILE_SYSTEM);
+                        }
                     } else {
                         askForPermission();
                     }
@@ -319,38 +386,6 @@ public class ActivityUploadActivity extends Fragment {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-        if (requestCode == FILE_SYSTEM) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                File root = Environment.getExternalStorageDirectory();
-                File base_dir = new File(root.getAbsolutePath() + getString(R.string.base_dir));
-                if (!base_dir.exists()) {
-                    base_dir.mkdirs();
-                }
-                String type = mmimeType.getSelectedItem().toString();
-
-                if (type.equalsIgnoreCase("image")) {
-                    mMimeType = "image/*";
-                    fileType = "image";
-                    intType = "1";
-                } else if (type.equalsIgnoreCase("audio")) {
-                    mMimeType = "audio/*";
-                    fileType = "audio";
-                    intType = "4";
-                } else if (type.equalsIgnoreCase("video")) {
-                    mMimeType = "video/*";
-                    fileType = "video";
-                    intType = "2";
-                }
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setType(mMimeType);
-                startActivityForResult(intent, FILE_SYSTEM);
-            } else {
-                Toast.makeText(getContext(), "You don't have permission to access file system !", Toast.LENGTH_SHORT).show();
-            }
-            return;
-        }
-
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
@@ -374,6 +409,134 @@ public class ActivityUploadActivity extends Fragment {
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        try {
+            inflater.inflate(R.menu.custom_search_menu, menu);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        try {
+            int selected = item.getItemId();
+            switch (selected) {
+                case R.id.m_custom_search:
+                    //custom_search cs = new custom_search("Users", "Add or remove participants", getContext());
+                    //cs.showDialog(dialog);
+
+                    //show dialog
+                    dialog.setContentView(R.layout.custom_search_dialog);
+
+                    //initialise widgets
+                    TextView mTip = dialog.findViewById(R.id.search_tip);
+                    //set text on tip
+                    mTip.setText("Search Query = Name or Surname");
+
+                    TextInputEditText mSearchQuery = dialog.findViewById(R.id.first_param);
+                    Button mSearch = dialog.findViewById(R.id.search);
+                    Button mOk = dialog.findViewById(R.id.ok);
+                    RecyclerView mSearchedResult = dialog.findViewById(R.id.search_list_recycler);
+                    //deny cancelling when user touches outside
+                    dialog.setCanceledOnTouchOutside(false);
+                    dialog.setOnKeyListener((dialog, keyCode, event) -> {
+                        if (keyCode == KeyEvent.KEYCODE_BACK) {
+                            //mDialog.dismiss();
+                        }
+                        return true;
+                    });
+
+                    mOk.setOnClickListener(v -> {
+                        try {
+                            dialog.dismiss();
+                            mParticipants = mAdapter.getParticipants();
+                        } catch (Exception e) {
+                            //Toast.makeText(getContext(), "Error " + e.toString(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    //set on search button click listener
+                    mSearch.setOnClickListener(v -> {
+                        try {
+                            String queryString = mSearchQuery.getText().toString().trim();
+                            if (queryString.equalsIgnoreCase("")) {
+                                Toast.makeText(getContext(), "Enter query string.", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+                            mSearchedResult.setLayoutManager(linearLayoutManager);
+                            mSearchedResult.setItemAnimator(new DefaultItemAnimator());
+
+                            RequestBody query = RequestBody.create(MultipartBody.FORM, queryString);
+
+                            Call<ResponseBody> users = apiInterface.Search(query);
+                            methods.showDialog(mDialog, "Loading users...", true);
+                            users.enqueue(new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    try {
+                                        methods.showDialog(mDialog, "Dismiss", false);
+                                        if (response.isSuccessful()) {
+                                            String responseData = response.body().string();
+                                            JsonParser parser = new JsonParser();
+                                            String result = parser.parse(responseData).getAsString();
+                                            if (result.length() == 0) {
+                                                Toast.makeText(getContext(), "No more users.", Toast.LENGTH_SHORT).show();
+                                                return;
+                                            }
+                                            JSONArray array = new JSONArray(result);
+                                            if (array.length() == 0) {
+                                                methods.showAlert("No more data", "There is/are no user(s) found tha match the name or surname.", getContext());
+                                                //Toast.makeText(getContext(), "No more feeds.", Toast.LENGTH_SHORT).show();
+                                                return;
+                                            }
+                                            list = new ArrayList<>();
+                                            search_model data;
+                                            for (int i = 0; i < array.length(); i++) {
+                                                JSONObject jsonObject = array.getJSONObject(i);
+                                                data = new search_model();
+                                                data.setId(jsonObject.getString("userid"));
+                                                data.setDisplayName(jsonObject.getString("fname") + " " + jsonObject.getString("lname"));
+                                                list.add(data);
+                                            }
+                                            mAdapter = new search_adapter(list, "Users", "Add or remove participants", getContext());
+                                            mSearchedResult.setAdapter(mAdapter);
+                                        } else {
+                                            Toast.makeText(getContext(), "Request unsuccessful", Toast.LENGTH_SHORT).show();
+                                        }
+                                    } catch (Exception e) {
+                                        System.out.println(e);
+                                        methods.showAlert("Error", e.toString(), getContext());
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                    methods.showDialog(mDialog, "Dismiss", false);
+                                    methods.showAlert("Failure", t.toString(), getContext());
+                                }
+                            });
+                        } catch (Exception e) {
+                            Toast.makeText(getContext(), "Error raising search.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    //show the dialog
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog.show();
+
+                    break;
+            }
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "Error on select menu item", Toast.LENGTH_SHORT).show();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /*
@@ -407,6 +570,7 @@ public class ActivityUploadActivity extends Fragment {
             while ((read = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, read);
             }
+
             outputStream.flush();
             realFile = file1;
 
@@ -448,7 +612,7 @@ public class ActivityUploadActivity extends Fragment {
     /*
      * performs post text data to server
      */
-    private void postTextActivity(String des, String date, String ftyp, String mime, String intType, String content, String id, String accno,String loca,String geoloca) {
+    private void postTextActivity(String des, String date, String ftyp, String mime, String intType, String content, String id, String accno, String loca, String geoloca, String tags,String act_type) {
         try {
             RequestBody dscr = RequestBody.create(MultipartBody.FORM, des);
             RequestBody dat = RequestBody.create(MultipartBody.FORM, date);
@@ -460,8 +624,10 @@ public class ActivityUploadActivity extends Fragment {
             RequestBody acc = RequestBody.create(MultipartBody.FORM, accno);
             RequestBody location = RequestBody.create(MultipartBody.FORM, loca);
             RequestBody geolocation = RequestBody.create(MultipartBody.FORM, geoloca);
+            RequestBody parts = RequestBody.create(MultipartBody.FORM, tags);
+            RequestBody activity = RequestBody.create(MultipartBody.FORM, act_type);
 
-            Call<ResponseBody> text = apiInterface.PostTextFeed(dscr, dat, filetype, mimetyp, intTyp, cont, userid, acc,location,geolocation);
+            Call<ResponseBody> text = apiInterface.PostTextFeed(dscr, dat, filetype, mimetyp, intTyp, cont, userid, acc, location, geolocation, parts,activity);
             methods.showDialog(mDialog, "Posting text feed...", true);
             text.enqueue(new Callback<ResponseBody>() {
                 @Override
@@ -482,11 +648,19 @@ public class ActivityUploadActivity extends Fragment {
                             mDate.setText("Pick Date");
                             mDescriptionText.setText("");
                             mContent.setText("");
+                            mLocation.setText("");
 
                         } else if (message.equalsIgnoreCase("Error")) {
                             methods.showAlert("Response", "Server error.", getContext());
                         } else if (message.equalsIgnoreCase("Exist")) {
                             methods.showAlert("Response", "There is another opportunity with the same details.", getContext());
+                        } else if (message.equalsIgnoreCase("Account Inactive")) {
+                            methods.showAlert("Response", "Your account is deactivated.Contact your admin(s).", getContext());
+                        } else if (message.equalsIgnoreCase("alumni")) {
+                            methods.showAlert("Response", "You are now an alumni,therefor you are no longer allowed to upload activities.", getContext());
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString(RegistrationActivity.Level, "alumni");
+                            editor.apply();
                         }
                         //Toast.makeText(RegistrationActivity.this, result, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
@@ -512,8 +686,14 @@ public class ActivityUploadActivity extends Fragment {
     /*
      * performs post binary data to server
      */
-    private void postBinaryActivity(String des, String date, String ftyp, String mime, String intType, File file, Uri uri, String id, String accno,String loca,String geoloca) {
+    private void postBinaryActivity(String des, String date, String ftyp, String mime, String intType, File file, Uri uri, String id, String accno, String loca, String geoloca, String tags,String act_type) {
         try {
+            //check if its binary upload and uri is not null
+            if (mFilepathUri == null && mmimeType.getSelectedItemId() == 1) {
+                methods.showAlert("Missing data", "Select a file please.", getContext());
+                return;
+            }
+
             RequestBody dscr = RequestBody.create(MultipartBody.FORM, des);
             RequestBody dat = RequestBody.create(MultipartBody.FORM, date);
             RequestBody filetype = RequestBody.create(MultipartBody.FORM, ftyp);
@@ -523,6 +703,8 @@ public class ActivityUploadActivity extends Fragment {
             RequestBody acc = RequestBody.create(MultipartBody.FORM, accno);
             RequestBody location = RequestBody.create(MultipartBody.FORM, loca);
             RequestBody geolocation = RequestBody.create(MultipartBody.FORM, geoloca);
+            RequestBody parts = RequestBody.create(MultipartBody.FORM, tags);
+            RequestBody activity = RequestBody.create(MultipartBody.FORM, act_type);
 
             RequestBody the_file = RequestBody.create(
                     MediaType.parse(getContext().getContentResolver().getType(uri)),
@@ -531,7 +713,7 @@ public class ActivityUploadActivity extends Fragment {
 
             MultipartBody.Part actual = MultipartBody.Part.createFormData("file", file.getName(), the_file);
 
-            Call<ResponseBody> binary = apiInterface.PostMediaFeed(dscr, dat, filetype, mimetyp, intTyp, userid, acc, actual,location,geolocation);
+            Call<ResponseBody> binary = apiInterface.PostMediaFeed(dscr, dat, filetype, mimetyp, intTyp, userid, acc, actual, location, geolocation, parts,activity);
             methods.showDialog(mDialog, "Posting media feed...", true);
             binary.enqueue(new Callback<ResponseBody>() {
                 @Override
@@ -551,11 +733,19 @@ public class ActivityUploadActivity extends Fragment {
                             mDate.setText("Pick Date");
                             mDescriptionText.setText("");
                             mContent.setText("");
+                            mLocation.setText("");
 
                         } else if (message.equalsIgnoreCase("Error")) {
                             methods.showAlert("Response", "Server error.", getContext());
                         } else if (message.equalsIgnoreCase("Exist")) {
                             methods.showAlert("Response", "There is another opportunity with the same details.", getContext());
+                        } else if (message.equalsIgnoreCase("Account Inactive")) {
+                            methods.showAlert("Response", "Your account is deactivated.Contact your admin(s).", getContext());
+                        } else if (message.equalsIgnoreCase("alumni")) {
+                            methods.showAlert("Response", "You are now an alumni,therefor you are longer allowed to upload activities.", getContext());
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString(RegistrationActivity.Level, "alumni");
+                            editor.apply();
                         }
                         //Toast.makeText(RegistrationActivity.this, result, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
@@ -575,6 +765,52 @@ public class ActivityUploadActivity extends Fragment {
             });
         } catch (Exception e) {
             Toast.makeText(getContext(), "Error raising upload operation", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /*
+     * performs retrieve activity types
+     */
+    private void getActivityTypes() {
+        try {
+            Call<ResponseBody> dis = apiInterface.getActivityTypes();
+            methods.showDialog(mDialog, "Loading activity types...", true);
+            dis.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    try {
+                        methods.showDialog(mDialog, "Dismiss", false);
+                        if (response.isSuccessful()) {
+                            String responseData = response.body().string();
+                            JsonParser parser = new JsonParser();
+                            String result = parser.parse(responseData).getAsString();
+                            JSONArray array = new JSONArray(result);
+                            ArrayList<String> acts = new ArrayList<>();
+                            for (int i = 0; i < array.length(); i++) {
+                                JSONObject jsonObject = array.getJSONObject(i);
+                                acts.add(jsonObject.getString("description"));
+                            }
+
+                            ArrayAdapter<String> itemsAdapter1 = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, acts);
+                            itemsAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            mActivityType.setAdapter(itemsAdapter1);
+                        } else {
+                            Toast.makeText(getContext(), "Request unsuccessful", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        System.out.println(e);
+                        methods.showAlert("Error", e.toString(), getContext());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    methods.showDialog(mDialog, "Dismiss", false);
+                    methods.showAlert("List onFailure", t.toString(), getContext());
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
         }
     }
 }

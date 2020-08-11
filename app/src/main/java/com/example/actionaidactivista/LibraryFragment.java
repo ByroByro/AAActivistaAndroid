@@ -27,6 +27,7 @@ import com.example.actionaidactivista.models.opportunity;
 import com.example.actionaidactivista.navigation.MainBottomNavActivity;
 import com.example.actionaidactivista.retrofit.ApiClient;
 import com.example.actionaidactivista.retrofit.ApiInterface;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.gson.JsonParser;
 
 import org.json.JSONArray;
@@ -93,10 +94,10 @@ public class LibraryFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        try{
-            inflater.inflate(R.menu.search_menu,menu);
+        try {
+            inflater.inflate(R.menu.search_menu, menu);
             MenuItem item = menu.findItem(R.id.m_search);
-            SearchView searchView = (SearchView)item.getActionView();
+            SearchView searchView = (SearchView) item.getActionView();
             searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
@@ -106,15 +107,23 @@ public class LibraryFragment extends Fragment {
 
                 @Override
                 public boolean onQueryTextChange(String newText) {
-                    if(mLibraryAdapter != null) {
+                    if (mLibraryAdapter != null) {
                         mLibraryAdapter.getFilter().filter(newText);
                     }
                     return false;
                 }
             });
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e);
         }
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+
+        MenuItem item = menu.findItem(R.id.m_refresh);
+        item.setVisible(false);
+        super.onPrepareOptionsMenu(menu);
     }
 
     private void getArticles() {
@@ -131,7 +140,7 @@ public class LibraryFragment extends Fragment {
                         String responseData = response.body().string();
                         JsonParser parser = new JsonParser();
                         String result = parser.parse(responseData).getAsString();
-                        if(result.length() == 0){
+                        if (result.length() == 0) {
                             Toast.makeText(getContext(), "No more articles.", Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -148,9 +157,10 @@ public class LibraryFragment extends Fragment {
                             article.setmFileType(jsonObject.getString("filetype"));
                             article.setmPath(jsonObject.getString("path"));
                             article.setmUrl(jsonObject.getString("url"));
+                            article.setmIntType(jsonObject.getString("inttype"));
                             mList.add(article);
                         }
-                        mLibraryAdapter = new library_adapter(mList,getContext());
+                        mLibraryAdapter = new library_adapter(mList, getContext());
                         mRecyclerView.setAdapter(mLibraryAdapter);
                     } else {
                         Toast.makeText(getContext(), "Request unsuccessful", Toast.LENGTH_SHORT).show();
@@ -164,8 +174,19 @@ public class LibraryFragment extends Fragment {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 methods.showDialog(mDialog, "Dismiss", false);
-                methods.showAlert("List onFailure", t.toString(), getContext());
+                methods.showAlert("Failure", t.toString(), getContext());
             }
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        try {
+            mLibraryAdapter.releaseExoPlayer();
+        }catch (Exception e){
+            System.out.println(e);
+        }
+        //Toast.makeText(getContext(),"Library Fragment onDestroy.",Toast.LENGTH_LONG).show();
+        super.onDestroy();
     }
 }

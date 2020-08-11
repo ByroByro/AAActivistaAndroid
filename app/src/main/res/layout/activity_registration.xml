@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -17,8 +18,8 @@
             android:layout_height="30dp"
             android:layout_marginTop="15dp"
             android:gravity="center_horizontal"
-            android:textColor="@color/colorRed"
             android:text="Register"
+            android:textColor="@color/colorRed"
             android:textSize="20dp" />
 
         <com.google.android.material.textfield.TextInputLayout
@@ -59,14 +60,21 @@
             android:text="Pick date of birth"
             android:textAllCaps="false"
             android:textColor="@color/grey"
-            android:textSize="20dp" />
+            android:textSize="20dp"/>
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:id="@+id/dob_Status"
+            android:text="Make DOB public.Your DOB will appear as it is else it will appear as age."/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="20dp"
             android:layout_marginTop="15dp"
             android:text="Select Province"
-            android:textSize="15dp" />
+            android:textSize="15dp"/>
 
         <Spinner
             android:id="@+id/province"
@@ -119,6 +127,52 @@
                 android:layout_height="wrap_content"
                 android:hint="Occupation"
                 android:inputType="textPersonName" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Phone No(e.g 0775333555)"
+                android:inputType="number" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email"
+                android:inputType="textEmailAddress" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/biography"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Biography/About"
+                android:gravity="top|left"
+                android:inputType="textMultiLine"
+                android:lines="4"
+                android:maxLines="20"
+                android:scrollbars="vertical" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

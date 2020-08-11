@@ -13,6 +13,42 @@ public class contact {
     private String mProfileUrl;
     private String mStatus;
     private String mActive;
+    private String mPhone;
+    private String mEmail;
+    private String mBio;
+    private String mDobPublic;
+
+    public String getmPhone() {
+        return mPhone;
+    }
+
+    public void setmPhone(String mPhone) {
+        this.mPhone = mPhone;
+    }
+
+    public String getmEmail() {
+        return mEmail;
+    }
+
+    public void setmEmail(String mEmail) {
+        this.mEmail = mEmail;
+    }
+
+    public String getmBio() {
+        return mBio;
+    }
+
+    public void setmBio(String mBio) {
+        this.mBio = mBio;
+    }
+
+    public String getmDobPublic() {
+        return mDobPublic;
+    }
+
+    public void setmDobPublic(String mDobPublic) {
+        this.mDobPublic = mDobPublic;
+    }
 
     public String getmStatus() {
         return mStatus;

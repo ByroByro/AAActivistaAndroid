@@ -8,6 +8,15 @@ public class library_article {
     private String mFileType;
     private String mPath;
     private String mUrl;
+    private String mIntType;
+
+    public String getmIntType() {
+        return mIntType;
+    }
+
+    public void setmIntType(String mIntType) {
+        this.mIntType = mIntType;
+    }
 
     public String getmDate() {
         return mDate;

@@ -14,6 +14,51 @@ public class feed {
     private String mStatus;//whether approved or not
     private String mLocation;//location is string
     private String mGeoLocation;//location in coordinates
+    private String mUploaderId;//user id of the person who uploaded the activity
+    private String noOfLikes;//number of likes on feed
+    private String uploaderName;//first name of person who uploaded the feed
+    private String uploaderSurname;//surname of person who uploaded the feed
+    private String uploaderProfile;//profile pic of person who uploaded the feed
+
+    public String getNoOfLikes() {
+        return noOfLikes;
+    }
+
+    public void setNoOfLikes(String noOfLikes) {
+        this.noOfLikes = noOfLikes;
+    }
+
+    public String getUploaderName() {
+        return uploaderName;
+    }
+
+    public void setUploaderName(String uploaderName) {
+        this.uploaderName = uploaderName;
+    }
+
+    public String getUploaderSurname() {
+        return uploaderSurname;
+    }
+
+    public void setUploaderSurname(String uploaderSurname) {
+        this.uploaderSurname = uploaderSurname;
+    }
+
+    public String getUploaderProfile() {
+        return uploaderProfile;
+    }
+
+    public void setUploaderProfile(String uploaderProfile) {
+        this.uploaderProfile = uploaderProfile;
+    }
+
+    public String getmUploaderId() {
+        return mUploaderId;
+    }
+
+    public void setmUploaderId(String mUploaderId) {
+        this.mUploaderId = mUploaderId;
+    }
 
     public String getmLocation() {
         return mLocation;

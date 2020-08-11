@@ -17,6 +17,7 @@ import android.os.Environment;
 import android.provider.OpenableColumns;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -46,10 +47,12 @@ public class UploadLibraryMaterialActivity extends AppCompatActivity {
     private Button mAttach;
     private Button mUpload;
     private String mFileType = "";
+    private String mIntType = "";
     //code for file system request
     final int FILE_SYSTEM = 100;
     private Uri mFilepathUri;
     private File file;
+    private ImageButton attach;
 
     //retrofit
     private ApiInterface apiInterface;
@@ -70,10 +73,12 @@ public class UploadLibraryMaterialActivity extends AppCompatActivity {
             mMimmeType = (Spinner) findViewById(R.id.mimeSpinner);
             mAttach = (Button) findViewById(R.id.attach_lib_file);
             mUpload = (Button) findViewById(R.id.upload);
+            attach = (ImageButton) findViewById(R.id.attach_lib_file2);
+
             apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
             mDialog = new Dialog(this);
 
-            mAttach.setOnClickListener(v -> {
+            attach.setOnClickListener(v -> {
                 try {
                     //check for file system permissions
                     if (ContextCompat.checkSelfPermission(UploadLibraryMaterialActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) ==
@@ -89,12 +94,14 @@ public class UploadLibraryMaterialActivity extends AppCompatActivity {
                         long type = mMimmeType.getSelectedItemId();
                         if (type == 0) {
                             mFileType = "pdf";
+                            mIntType = "3";
                             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                             intent.addCategory(Intent.CATEGORY_OPENABLE);
                             intent.setType("application/pdf");
                             startActivityForResult(intent, FILE_SYSTEM);
                         } else if (type == 1) {
                             mFileType = "word";
+                            mIntType = "3";
                             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                             intent.addCategory(Intent.CATEGORY_OPENABLE);
                             intent.setType("*/*");
@@ -103,6 +110,7 @@ public class UploadLibraryMaterialActivity extends AppCompatActivity {
                             startActivityForResult(intent, FILE_SYSTEM);
                         } else if (type == 2) {
                             mFileType = "powerpoint";
+                            mIntType = "3";
                             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                             intent.addCategory(Intent.CATEGORY_OPENABLE);
                             intent.setType("*/*");
@@ -111,11 +119,30 @@ public class UploadLibraryMaterialActivity extends AppCompatActivity {
                             startActivityForResult(intent, FILE_SYSTEM);
                         } else if (type == 3) {
                             mFileType = "excel";
+                            mIntType = "3";
                             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                             intent.addCategory(Intent.CATEGORY_OPENABLE);
                             intent.setType("*/*");
                             String[] mime_types = {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"};
                             intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
+                            startActivityForResult(intent, FILE_SYSTEM);
+                        } else if (type == 4) {
+                            mFileType = "video";
+                            mIntType = "2";
+                            Intent intent = new Intent(Intent.ACTION_PICK);
+                            intent.setType("video/*");
+                            startActivityForResult(intent, FILE_SYSTEM);
+                        } else if (type == 5) {
+                            mFileType = "audio";
+                            mIntType = "4";
+                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                            intent.setType("audio/*");
+                            startActivityForResult(intent, FILE_SYSTEM);
+                        } else if (type == 6) {
+                            mFileType = "image";
+                            mIntType = "1";
+                            Intent intent = new Intent(Intent.ACTION_PICK);
+                            intent.setType("image/*");
                             startActivityForResult(intent, FILE_SYSTEM);
                         }
                     } else {
@@ -128,6 +155,18 @@ public class UploadLibraryMaterialActivity extends AppCompatActivity {
             });
             mUpload.setOnClickListener(v -> {
                 try {
+
+                    if (file == null || mFilepathUri == null) {
+                        methods.showAlert("No file", "Select a file.", this);
+                        return;
+                    }
+
+                    //long fileSizeInBytes = file.length();
+                    //long fileSizeInKB = fileSizeInBytes / 1024;
+                    //long fileSizeInMB = fileSizeInKB / 1024;
+
+                    //methods.showAlert("Size","Kb " + fileSizeInKB + "\nMb " + fileSizeInMB,this);
+
                     String title = mTitle.getText().toString().trim();
                     String aut = mAuthor.getText().toString().trim();
                     String ftyp = mFileType;
@@ -144,7 +183,7 @@ public class UploadLibraryMaterialActivity extends AppCompatActivity {
                     }
 
                     String dtePosted = methods.getDateForSqlServer();
-                    postMaterial(title, aut, dtePosted, ftyp, mmtpy, file, mFilepathUri);
+                    postMaterial(title, aut, dtePosted, ftyp, mmtpy, file, mFilepathUri, mIntType);
                 } catch (Exception e) {
                     Toast.makeText(UploadLibraryMaterialActivity.this, "Error raising event." + e.toString(), Toast.LENGTH_SHORT).show();
                 }
@@ -163,51 +202,52 @@ public class UploadLibraryMaterialActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-        if (requestCode == FILE_SYSTEM) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                File root = Environment.getExternalStorageDirectory();
-                File base_dir = new File(root.getAbsolutePath() + getString(R.string.base_dir));
-                if (!base_dir.exists()) {
-                    base_dir.mkdirs();
-                }
-                long type = mMimmeType.getSelectedItemId();
-                if (type == 0) {
-                    mFileType = "pdf";
-                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    intent.setType("application/pdf");
-                    startActivityForResult(intent, FILE_SYSTEM);
-                } else if (type == 1) {
-                    mFileType = "word";
-                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    intent.setType("*/*");
-                    String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword"};
-                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
-                    startActivityForResult(intent, FILE_SYSTEM);
-                } else if (type == 2) {
-                    mFileType = "powerpoint";
-                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    intent.setType("*/*");
-                    String[] mime_types = {"application/vnd.openxmlformats-officedocument.presentationml.presentation", "application/vnd.ms-powerpoint"};
-                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
-                    startActivityForResult(intent, FILE_SYSTEM);
-                } else if (type == 3) {
-                    mFileType = "excel";
-                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    intent.setType("*/*");
-                    String[] mime_types = {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"};
-                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
-                    startActivityForResult(intent, FILE_SYSTEM);
-                }
-            } else {
-                Toast.makeText(this, "You don't have permission to access file system !", Toast.LENGTH_SHORT).show();
-            }
-            return;
-        }
+//        if (requestCode == FILE_SYSTEM) {
+//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//
+//                File root = Environment.getExternalStorageDirectory();
+//                File base_dir = new File(root.getAbsolutePath() + getString(R.string.base_dir));
+//                if (!base_dir.exists()) {
+//                    base_dir.mkdirs();
+//                }
+//                long type = mMimmeType.getSelectedItemId();
+//                if (type == 0) {
+//                    mFileType = "pdf";
+//                    mIntType = "3";
+//                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+//                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+//                    intent.setType("application/pdf");
+//                    startActivityForResult(intent, FILE_SYSTEM);
+//                } else if (type == 1) {
+//                    mFileType = "word";
+//                    mIntType = "3";
+//                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+//                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+//                    intent.setType("*/*");
+//                    String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword"};
+//                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
+//                    startActivityForResult(intent, FILE_SYSTEM);
+//                } else if (type == 2) {
+//                    mFileType = "powerpoint";
+//                    mIntType = "3";
+//                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+//                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+//                    intent.setType("*/*");
+//                    String[] mime_types = {"application/vnd.openxmlformats-officedocument.presentationml.presentation", "application/vnd.ms-powerpoint"};
+//                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
+//                    startActivityForResult(intent, FILE_SYSTEM);
+//                } else if (type == 4) {
+//                    mFileType = "video";
+//                    mIntType = "2";
+//                    Intent intent = new Intent(Intent.ACTION_PICK);
+//                    intent.setType("video/*");
+//                    startActivityForResult(intent, FILE_SYSTEM);
+//                }
+//            } else {
+//                Toast.makeText(this, "You don't have permission to access file system !", Toast.LENGTH_SHORT).show();
+//            }
+//            return;
+//        }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
@@ -305,7 +345,7 @@ public class UploadLibraryMaterialActivity extends AppCompatActivity {
     /*
      * method for posting material
      */
-    private void postMaterial(String title, String author, String date, String filetype, String mime, File file, Uri uri) {
+    private void postMaterial(String title, String author, String date, String filetype, String mime, File file, Uri uri, String intType) {
         try {
             //include the userid of admin posting the materiAL
             RequestBody titl = RequestBody.create(MultipartBody.FORM, title);
@@ -313,6 +353,7 @@ public class UploadLibraryMaterialActivity extends AppCompatActivity {
             RequestBody dtepost = RequestBody.create(MultipartBody.FORM, date);
             RequestBody ftyp = RequestBody.create(MultipartBody.FORM, filetype);
             RequestBody mim = RequestBody.create(MultipartBody.FORM, mime);
+            RequestBody inttype = RequestBody.create(MultipartBody.FORM, intType);
 
             RequestBody the_file = RequestBody.create(
                     MediaType.parse(getContentResolver().getType(uri)),
@@ -321,7 +362,7 @@ public class UploadLibraryMaterialActivity extends AppCompatActivity {
 
             MultipartBody.Part actual = MultipartBody.Part.createFormData("file", file.getName(), the_file);
 
-            Call<ResponseBody> upload = apiInterface.PostLibraryMaterial(titl, auth, dtepost, ftyp, mim, actual);
+            Call<ResponseBody> upload = apiInterface.PostLibraryMaterial(titl, auth, dtepost, ftyp, mim, inttype, actual);
             methods.showDialog(mDialog, "Uploading material...", true);
             upload.enqueue(new Callback<ResponseBody>() {
                 @Override

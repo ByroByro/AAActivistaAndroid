@@ -147,6 +147,11 @@ public class OpportunitiesFragment extends Fragment {
                             opportunity.setmDateposted(jsonObject.getString("dateposted"));
                             opportunity.setmClosingdate(jsonObject.getString("closingdate"));
                             opportunity.setmLocation(jsonObject.getString("location"));
+                            if (jsonObject.getString("docs").equalsIgnoreCase("")) {
+                                opportunity.setmDocsLink("N/A");
+                            } else {
+                                opportunity.setmDocsLink(jsonObject.getString("docs"));
+                            }
                             mList.add(opportunity);
                         }
 
@@ -164,7 +169,7 @@ public class OpportunitiesFragment extends Fragment {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 methods.showDialog(mDialog, "Dismiss", false);
-                methods.showAlert("List onFailure", t.toString(), getContext());
+                methods.showAlert("Failure", t.toString(), getContext());
             }
         });
     }

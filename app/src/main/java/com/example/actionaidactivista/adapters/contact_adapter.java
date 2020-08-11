@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,17 +21,58 @@ import com.example.actionaidactivista.methods;
 import com.example.actionaidactivista.models.contact;
 import com.example.actionaidactivista.models.library_article;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class contact_adapter extends RecyclerView.Adapter<contact_adapter.ViewHolder> {
 
     private Context mContext;
     private List<contact> mContacts;
+    private List<contact> filtered_Contacts;
 
-    public contact_adapter(List<contact> list, Context ctx){
+    public contact_adapter(List<contact> list, Context ctx) {
         this.mContacts = list;
         this.mContext = ctx;
+        this.filtered_Contacts = new ArrayList<>(list);
     }
+
+    public Filter getFilter() {
+        return filter;
+    }
+
+    Filter filter = new Filter() {
+
+        //run on a bg thread
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+
+            List<contact> filtered_items = new ArrayList<>();
+            if (constraint.toString().isEmpty()) {
+                filtered_items.addAll(filtered_Contacts);
+            } else {
+                for (contact item : filtered_Contacts) {
+                    if ((item.getmName() != null && item.getmName().toLowerCase().contains(constraint)) || (item.getmSurname() != null && item.getmSurname().toLowerCase().contains(constraint)
+                            || (item.getmStatus() != null && item.getmStatus().toLowerCase().contains(constraint)))) {
+                        filtered_items.add(item);
+                    }
+                }
+            }
+
+            FilterResults filterResults = new FilterResults();
+            filterResults.values = filtered_items;
+
+            return filterResults;
+        }
+
+        //run on UI thread
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            mContacts.clear();
+            mContacts.addAll((Collection<? extends contact>) results.values);
+            notifyDataSetChanged();
+        }
+    };
 
     @NonNull
     @Override
@@ -46,7 +88,7 @@ public class contact_adapter extends RecyclerView.Adapter<contact_adapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        try{
+        try {
             contact contact = mContacts.get(position);
             holder.mName.setText("Name : " + contact.getmName() + " " + contact.getmSurname());
             holder.mPhone.setText("Occupation : " + contact.getmOccupation());
@@ -64,21 +106,27 @@ public class contact_adapter extends RecyclerView.Adapter<contact_adapter.ViewHo
                 holder.mProfile.setImageResource(R.drawable.ic_contacts_red);
             }
             holder.mCardView.setOnClickListener(v -> {
-               try{
-                   StringBuffer stringBuffer = new StringBuffer();
-                   stringBuffer.append("Name : " + contact.getmName());
-                   stringBuffer.append("\nSurname : " + contact.getmSurname());
-                   stringBuffer.append("\nGender : " + contact.getmGender());
-                   stringBuffer.append("\nDate of Birth : " + contact.getmDob());
-                   stringBuffer.append("\nOccupation : " + contact.getmOccupation());
-                   stringBuffer.append("\nApproval status(IsApproved) : " + contact.getmStatus());
-                   methods.showAlert("\nActivista Details",stringBuffer.toString(),mContext);
-               }catch (Exception e){
-                   Toast.makeText(mContext,"Error raising download event.",Toast.LENGTH_SHORT).show();
-               }
+                try {
+                    StringBuffer stringBuffer = new StringBuffer();
+                    stringBuffer.append("Name : " + contact.getmName());
+                    stringBuffer.append("\nSurname : " + contact.getmSurname());
+                    stringBuffer.append("\nGender : " + contact.getmGender());
+                    if (contact.getmDobPublic().equalsIgnoreCase("True")) {
+                        stringBuffer.append("\nDate of Birth : " + methods.getReadableDate(contact.getmDob(), mContext));
+                    } else {
+                       stringBuffer.append("\nAge : " + methods.getAge(contact.getmDob(),mContext));
+                    }
+                    stringBuffer.append("\nOccupation : " + contact.getmOccupation());
+                    stringBuffer.append("\nPhone No : " + contact.getmPhone());
+                    //stringBuffer.append("\nApproval status(IsApproved) : " + contact.getmStatus());
+                    stringBuffer.append("\nBiography : " + contact.getmBio());
+                    methods.showAlert("\nActivista Details", stringBuffer.toString(), mContext);
+                } catch (Exception e) {
+                    Toast.makeText(mContext, "Error raising download event.", Toast.LENGTH_SHORT).show();
+                }
             });
-        }catch (Exception e){
-            Toast.makeText(mContext,"Error binding view holder",Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(mContext, "Error binding view holder", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -87,7 +135,7 @@ public class contact_adapter extends RecyclerView.Adapter<contact_adapter.ViewHo
         return mContacts.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView mName;
         public TextView mPhone;

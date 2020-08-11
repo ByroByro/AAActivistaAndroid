@@ -196,7 +196,7 @@ public class prov_dis_helper extends SQLiteOpenHelper {
         return dis;
     }
 
-    //GET PROVINCE ID
+    //GET PROVINCE ID FROM PROVINCE NAME
     public String provID(String prov) {
         String id = "";
         try {
@@ -211,7 +211,7 @@ public class prov_dis_helper extends SQLiteOpenHelper {
         return id;
     }
 
-    //GET DISTRICT ID
+    //GET DISTRICT ID FROM DISTRICT NAME
     public String disID(String dis) {
         String id = "";
         try {
@@ -224,6 +224,36 @@ public class prov_dis_helper extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         return id;
+    }
+
+    //GET PROVINCE NAME FROM PROVINCE ID
+    public String getProvinceName(String province_id){
+        String province = "";
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            Cursor res = db.rawQuery("select NAME from Province_table where PROVINCEID='" + province_id + "'", null);
+            while (res.moveToNext()) {
+                province = res.getString(res.getColumnIndex("NAME"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return province;
+    }
+
+    //GET DISTRICT NAME FROM DISTRICT ID
+    public String getDistrictName(String district_id){
+        String province = "";
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            Cursor res = db.rawQuery("select NAME from Districts_table where DISTRICTID='" + district_id + "'", null);
+            while (res.moveToNext()) {
+                province = res.getString(res.getColumnIndex("NAME"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return province;
     }
 
     public void deleteAll(String table) {

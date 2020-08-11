@@ -4,10 +4,16 @@ package com.example.actionaidactivista;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -62,7 +68,7 @@ public class ContactFragment extends Fragment {
             //set title
             //initialise api interface
             apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
-            ((MainBottomNavActivity) getActivity()).setActionBarTitle("Activists");
+            ((MainBottomNavActivity) getActivity()).setActionBarTitle("Members");
             //initialize widgets
             mRecyclerView = root.findViewById(R.id.contact_list_recycler);
             mRecyclerView.setHasFixedSize(true);
@@ -71,7 +77,8 @@ public class ContactFragment extends Fragment {
             mRecyclerView.setItemAnimator(new DefaultItemAnimator());
             mDialog = new Dialog(getContext());
 
-            //get activistas
+            setHasOptionsMenu(true);
+            //get members
             getActivistas();
 
         } catch (Exception e) {
@@ -83,9 +90,9 @@ public class ContactFragment extends Fragment {
     private void getActivistas() {
         RequestBody page = RequestBody.create(MultipartBody.FORM, "1");
         RequestBody rows = RequestBody.create(MultipartBody.FORM, "5");
-        Call<ResponseBody> activistas = apiInterface.getActivistas();
-        methods.showDialog(mDialog, "Loading activistas...", true);
-        activistas.enqueue(new Callback<ResponseBody>() {
+        Call<ResponseBody> members = apiInterface.getActivistas();
+        methods.showDialog(mDialog, "Loading members...", true);
+        members.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
@@ -94,11 +101,15 @@ public class ContactFragment extends Fragment {
                         String responseData = response.body().string();
                         JsonParser parser = new JsonParser();
                         String result = parser.parse(responseData).getAsString();
-                        if(result.length() == 0){
-                            Toast.makeText(getContext(), "No more activistas.", Toast.LENGTH_SHORT).show();
+                        if (result.length() == 0) {
+                            Toast.makeText(getContext(), "No members.", Toast.LENGTH_SHORT).show();
                             return;
                         }
                         JSONArray array = new JSONArray(result);
+                        if (array.length() == 0) {
+                            Toast.makeText(getContext(), "No members.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         mList = new ArrayList<>();
                         contact contact;
                         for (int i = 0; i < array.length(); i++) {
@@ -115,6 +126,26 @@ public class ContactFragment extends Fragment {
                             contact.setmAccountNo(jsonObject.getString("accno"));
                             contact.setmProfileUrl(jsonObject.getString("profile"));
                             contact.setmStatus(jsonObject.getString("approved"));
+                            if (jsonObject.getString("email").equalsIgnoreCase("")) {
+                                contact.setmEmail("N/A");
+                            } else {
+                                contact.setmEmail(jsonObject.getString("email"));
+                            }
+                            if (jsonObject.getString("biography").equalsIgnoreCase("")) {
+                                contact.setmBio("N/A");
+                            } else {
+                                contact.setmBio(jsonObject.getString("biography"));
+                            }
+                            if (jsonObject.getString("isdobpublic").equalsIgnoreCase("")) {
+                                contact.setmDobPublic("N/A");
+                            } else {
+                                contact.setmDobPublic(jsonObject.getString("isdobpublic"));
+                            }
+                            if (jsonObject.getString("phone").equalsIgnoreCase("")) {
+                                contact.setmPhone("N/A");
+                            } else {
+                                contact.setmPhone(jsonObject.getString("phone"));
+                            }
                             mList.add(contact);
                         }
 
@@ -132,8 +163,43 @@ public class ContactFragment extends Fragment {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 methods.showDialog(mDialog, "Dismiss", false);
-                methods.showAlert("List onFailure", t.toString(), getContext());
+                methods.showAlert("Failure", t.toString(), getContext());
             }
         });
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        try {
+            inflater.inflate(R.menu.search_menu, menu);
+            MenuItem item = menu.findItem(R.id.m_search);
+            SearchView searchView = (SearchView) item.getActionView();
+            searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    if (mContactAdapter != null) {
+                        mContactAdapter.getFilter().filter(newText);
+                    }
+                    return false;
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+
+        MenuItem item = menu.findItem(R.id.m_refresh);
+        item.setVisible(false);
+        super.onPrepareOptionsMenu(menu);
     }
 }

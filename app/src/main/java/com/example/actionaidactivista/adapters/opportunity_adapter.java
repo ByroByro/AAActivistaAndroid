@@ -4,6 +4,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Paint;
+import android.net.Uri;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,19 +21,17 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.actionaidactivista.ApplyActivityActivity;
+import com.example.actionaidactivista.ApplyOpportunityActivity;
 import com.example.actionaidactivista.R;
+import com.example.actionaidactivista.RegistrationActivity;
 import com.example.actionaidactivista.methods;
 import com.example.actionaidactivista.models.opportunity;
 import com.example.actionaidactivista.retrofit.ApiClient;
 import com.example.actionaidactivista.retrofit.ApiInterface;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -74,7 +75,7 @@ public class opportunity_adapter extends RecyclerView.Adapter<opportunity_adapte
             } else {
                 for (opportunity item : filtered_Opps) {
                     if ((item.getmTitle() != null && item.getmTitle().toLowerCase().contains(constraint)) || (item.getmDescription() != null && item.getmDescription().toLowerCase().contains(constraint)
-                            || (item.getmLocation() != null && item.getmLocation().toLowerCase().contains(constraint)|| (item.getmDateposted() != null && item.getmDateposted().toLowerCase().contains(constraint))))) {
+                            || (item.getmLocation() != null && item.getmLocation().toLowerCase().contains(constraint) || (item.getmDateposted() != null && item.getmDateposted().toLowerCase().contains(constraint))))) {
                         filtered_items.add(item);
                     }
                 }
@@ -113,34 +114,32 @@ public class opportunity_adapter extends RecyclerView.Adapter<opportunity_adapte
             opportunity chance = mOpportunities.get(position);
             holder.mTitle.setText("Title : " + chance.getmTitle());
             StringBuffer stringBuffer = new StringBuffer();
-//            String mDes = "";
-//            if (chance.getmDescription().length() > 25) {
-//                char[] message = chance.getmDescription().toCharArray();
-//                int x = 0;
-//                while (x < 25) {
-//                    stringBuffer.append(message[x]);
-//                    x++;
-//                }
-//                stringBuffer.append("...");
-//                mDes = stringBuffer.toString();
-//            }else {
-//                holder.mDes.setText(chance.getmDescription());
-//            }
             holder.mDes.setText("Description : " + chance.getmDescription());
             try {
                 if (methods.compareCurrentDateAndDbDate(methods.getDatev2(), chance.getmClosingdate())) {
-                    holder.mApply.setVisibility(View.INVISIBLE);
+                    holder.mApply.setVisibility(View.GONE);
+                    holder.mExpired.setVisibility(View.VISIBLE);
+                } else {
+                    holder.mApply.setVisibility(View.VISIBLE);
+                    holder.mExpired.setVisibility(View.GONE);
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 System.out.println(e);
+            }
+            if (chance.getmDocsLink().equalsIgnoreCase("N/A")) {
+                holder.mDocsLink.setVisibility(View.GONE);
+            } else {
+                holder.mDocsLink.setVisibility(View.VISIBLE);
+                holder.mDocsLink.setText(chance.getmDocsLink());
+                holder.mDocsLink.setPaintFlags(holder.mDocsLink.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             }
             holder.mDetails.setOnClickListener(v -> {
                 try {
                     StringBuffer stringBuffer1 = new StringBuffer();
                     stringBuffer1.append("Title : " + chance.getmTitle());
                     stringBuffer1.append("\nDescription : " + chance.getmDescription());
-                    stringBuffer1.append("\nPosted on : " + chance.getmDateposted());
-                    stringBuffer1.append("\nClosing date : " + chance.getmClosingdate());
+                    stringBuffer1.append("\nPosted on : " + methods.getReadableDate(chance.getmDateposted(), mContext));
+                    stringBuffer1.append("\nClosing date : " + methods.getReadableDate(chance.getmClosingdate(), mContext));
                     stringBuffer1.append("\nLocation : " + chance.getmLocation());
                     methods.showAlert("Opportunity Details", stringBuffer1.toString(), mContext);
                 } catch (Exception e) {
@@ -149,10 +148,25 @@ public class opportunity_adapter extends RecyclerView.Adapter<opportunity_adapte
             });
             holder.mApply.setOnClickListener(v -> {
                 try {
-                    Intent apply = new Intent(mContext, ApplyActivityActivity.class);
-                    apply.putExtra("opportunity_id", chance.getmID());
-                    apply.putExtra("description", chance.getmTitle());
-                    mContext.startActivity(apply);
+                    SharedPreferences sharedPreferences = mContext.getSharedPreferences(RegistrationActivity.ACC_PREFERENCES, Context.MODE_PRIVATE);
+                    String acctype = sharedPreferences.getString(RegistrationActivity.AccountType, "none");
+                    if (acctype.equalsIgnoreCase("admin")) {
+                        methods.showAlert("Admin account", "You are an admin.", mContext);
+                    } else {
+                        if (sharedPreferences.contains(RegistrationActivity.UserId)) {
+                            int mUserId = sharedPreferences.getInt(RegistrationActivity.UserId, 0);
+                            if (mUserId == 0) {
+                                methods.showAlert("Sign In required", "You need to sign in to be able to apply.", mContext);
+                            } else {
+                                Intent apply = new Intent(mContext, ApplyOpportunityActivity.class);
+                                apply.putExtra("opportunity_id", chance.getmID());
+                                apply.putExtra("description", chance.getmTitle());
+                                mContext.startActivity(apply);
+                            }
+                        } else {
+                            methods.showAlert("Sign In required", "You need to sign in to be able to apply.", mContext);
+                        }
+                    }
                 } catch (Exception e) {
                     Toast.makeText(mContext, "Error raising apply event.", Toast.LENGTH_SHORT).show();
                 }
@@ -182,7 +196,7 @@ public class opportunity_adapter extends RecyclerView.Adapter<opportunity_adapte
                             //set positive button
                             builder.setPositiveButton("Yes", (dialog, which) -> {
                                 try {
-                                    deleteOpportunity(chance.getmID());
+                                    deleteOpportunity(chance.getmID(), position);
                                 } catch (Exception e) {
                                     System.out.println(e);
                                 }
@@ -199,6 +213,34 @@ public class opportunity_adapter extends RecyclerView.Adapter<opportunity_adapte
                     }
                 } catch (Exception e) {
                     Toast.makeText(mContext, "Error raising apply event.", Toast.LENGTH_SHORT).show();
+                }
+            });
+            holder.mDocsLink.setOnClickListener(v -> {
+                try{
+                    SharedPreferences sharedPreferences = mContext.getSharedPreferences(RegistrationActivity.ACC_PREFERENCES, Context.MODE_PRIVATE);
+                    String acctype = sharedPreferences.getString(RegistrationActivity.AccountType, "none");
+                    if (acctype.equalsIgnoreCase("admin")) {
+                        methods.showAlert("Admin account", "You are an admin.", mContext);
+                    } else {
+                        if (sharedPreferences.contains(RegistrationActivity.UserId)) {
+                            int mUserId = sharedPreferences.getInt(RegistrationActivity.UserId, 0);
+                            if (mUserId == 0) {
+                                methods.showAlert("Sign In required", "You need to sign in to be able to apply.", mContext);
+                            } else {
+                                Intent intent = new Intent(Intent.ACTION_VIEW);
+                                intent.setData(Uri.parse(chance.getmDocsLink()));
+                                // Always use string resources for UI text.
+                                String title = mContext.getString(R.string.browser_intent);
+                                // Create and start the chooser
+                                Intent chooser = Intent.createChooser(intent, title);
+                                mContext.startActivity(chooser);
+                            }
+                        } else {
+                            methods.showAlert("Sign In required", "You need to sign in to be able to apply.", mContext);
+                        }
+                    }
+                }catch (Exception e){
+                    Toast.makeText(mContext,e.toString(),Toast.LENGTH_LONG).show();
                 }
             });
         } catch (Exception e) {
@@ -218,12 +260,16 @@ public class opportunity_adapter extends RecyclerView.Adapter<opportunity_adapte
         public Button mApply;
         public Button mDetails;
         public CardView mCard;
+        public Button mExpired;
+        public TextView mDocsLink;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             mTitle = itemView.findViewById(R.id.title);
             mDes = itemView.findViewById(R.id.description);
             mApply = itemView.findViewById(R.id.apply);
+            mExpired = itemView.findViewById(R.id.expired);
+            mDocsLink = itemView.findViewById(R.id.go_to_google_docs);
             mDetails = itemView.findViewById(R.id.opportunity_details);
             mCard = itemView.findViewById(R.id.opportunity_card_view);
         }
@@ -232,7 +278,7 @@ public class opportunity_adapter extends RecyclerView.Adapter<opportunity_adapte
     /*
      * performs deletion of opportunity
      */
-    private void deleteOpportunity(String oppId) {
+    private void deleteOpportunity(String oppId, int position) {
         try {
             RequestBody id = RequestBody.create(MultipartBody.FORM, oppId);
             //RequestBody op = RequestBody.create(MultipartBody.FORM, action);
@@ -250,6 +296,7 @@ public class opportunity_adapter extends RecyclerView.Adapter<opportunity_adapte
                             String result = methods.removeQoutes(responseData);
                             if (result.equalsIgnoreCase("Success")) {
                                 methods.showAlert("Result", "Operation success.", mContext);
+                                notifyItemRemoved(position);
                             } else if (result.equalsIgnoreCase("Failed")) {
                                 methods.showAlert("Result", "Operation failed.Try later.", mContext);
                             } else if (result.equalsIgnoreCase("Error")) {

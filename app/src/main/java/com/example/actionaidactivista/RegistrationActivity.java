@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -42,18 +43,23 @@ public class RegistrationActivity extends AppCompatActivity {
     int year, month, day;
     private Dialog mDialog;//custom dialog
     DatePickerDialog datePickerDialog;
+    private boolean isDobPublic = false;
     private TextInputEditText mName;//first name
     private TextInputEditText mSurname;//surname
-    private TextInputEditText mOcuupation;//person's occupation
+    private TextInputEditText mOccupation;//person's occupation
+    private TextInputEditText phoneNumber;//user phone no
     private Spinner mProvince;//province spinner
     private Spinner mDistrict;//province spinner
     private Spinner mGender;//province spinner
     private ProgressDialog mProgress;//progress dialog
+    private CheckBox mDobStatus;//determining whether dob will appear as age or as is
+    private TextInputEditText mEmail;//email field
+    private TextInputEditText mBiography;//biography field
     private com.example.actionaidactivista.database.prov_dis_helper prov_dis_helper;
     //retrofit
     private ApiInterface apiInterface;
     //SHARED PREFS CODE
-    public static final String ACC_PREFERENCES = "AccountPreferences" ;
+    public static final String ACC_PREFERENCES = "AccountPreferences";
     public static final String AccNo = "accountno";
     public static final String UserId = "userid";
     public static final String AccountType = "acctype";//admin or user
@@ -61,6 +67,7 @@ public class RegistrationActivity extends AppCompatActivity {
     public static final String ProfileUrl = "profileurl";
     public static final String IsApproved = "isapproved";
     public static final String IsLogged = "islogged";
+
     SharedPreferences sharedpreferences;
 
     @Override
@@ -73,33 +80,51 @@ public class RegistrationActivity extends AppCompatActivity {
             //set app bar title
             getSupportActionBar().setTitle(R.string.registration_app_bar_title);
 
-            //instantiate shared preferences
-            //sharedpreferences = getSharedPreferences(ACC_PREFERENCES, Context.MODE_PRIVATE);
             //initialise widgets
             mDob = (Button) findViewById(R.id.dob);
             mRegister = (Button) findViewById(R.id.register);
             calendar = Calendar.getInstance();
             mName = (TextInputEditText) findViewById(R.id.first_name);
             mSurname = (TextInputEditText) findViewById(R.id.surname);
-            mOcuupation = (TextInputEditText) findViewById(R.id.occupation);
+            mOccupation = (TextInputEditText) findViewById(R.id.occupation);
+            phoneNumber = (TextInputEditText) findViewById(R.id.phone);
             mProvince = (Spinner) findViewById(R.id.province);
             mDistrict = (Spinner) findViewById(R.id.district);
             mGender = (Spinner) findViewById(R.id.gender);
+            mDobStatus = (CheckBox) findViewById(R.id.dob_Status);
+            mEmail = (TextInputEditText) findViewById(R.id.email);
+            mBiography = (TextInputEditText) findViewById(R.id.biography);
             mProgress = new ProgressDialog(this);
             mDialog = new Dialog(this);
             apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
             prov_dis_helper = new prov_dis_helper(this, "", null);
 
             //check if there are zero provinces
-            if(prov_dis_helper.getProvinces().size() == 0){
+            if (prov_dis_helper.getProvinces().size() == 0) {
                 //get provinces from server
                 getProvinces();
             }
             //check if there are zero provinces
-            if(prov_dis_helper.getDistricts().size() == 0){
+            if (prov_dis_helper.getDistricts().size() == 0) {
                 //get districts from server
                 getDistricts();
             }
+
+            mDobStatus.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                try {
+                    if (isChecked) {
+                        //set public to true
+                        isDobPublic = true;
+                        //Toast.makeText(this, "true", Toast.LENGTH_SHORT).show();
+                    } else {
+                        //set public to false
+                        isDobPublic = false;
+                        //Toast.makeText(this, "false", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(this, "Failed to react to check change", Toast.LENGTH_SHORT).show();
+                }
+            });
 
             //populate provinces spinner
             ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, prov_dis_helper.getProvinces());
@@ -156,7 +181,10 @@ public class RegistrationActivity extends AppCompatActivity {
                     String province = mProvince.getSelectedItem().toString().trim();//province
                     String district = mDistrict.getSelectedItem().toString().trim();//district
                     String gender = mGender.getSelectedItem().toString().trim();//gender
-                    String occupation = mOcuupation.getText().toString().trim();//occupation
+                    String occupation = mOccupation.getText().toString().trim();//occupation
+                    String phone = phoneNumber.getText().toString().trim();//phone number
+                    String mail = mEmail.getText().toString().trim();//email
+                    String bio = mBiography.getText().toString().trim();//biography
 
                     if (dob.equalsIgnoreCase("Pick date of birth")) {
                         Toast.makeText(RegistrationActivity.this, "Pick date of birth please.", Toast.LENGTH_SHORT).show();
@@ -165,12 +193,31 @@ public class RegistrationActivity extends AppCompatActivity {
                     //check age
                     if (methods.checkAge(dob, this)) {
                         //over age
-                        methods.showAlert("Over Age", "You are not allowed to register because activistas must be less than 36 years.", this);
+                        methods.showAlert("Over Age", "You are not allowed to register because members must be less than 36 years.", this);
                         return;
                     }
-                    if (fname.equalsIgnoreCase("") || surname.equalsIgnoreCase("") || occupation.equalsIgnoreCase("")) {
+                    if (fname.equalsIgnoreCase("") || surname.equalsIgnoreCase("") || occupation.equalsIgnoreCase("") || phone.equalsIgnoreCase("")) {
                         methods.showAlert("Missing Info", "Enter all info.", this);
                         return;
+                    }
+
+                    String b;
+                    if (bio.equalsIgnoreCase("")) {
+                        b = "N/A";
+                    } else {
+                        b = bio;
+                    }
+
+                    if (mail.equalsIgnoreCase("")) {
+                        methods.showAlert("Missing Info", "Enter email.", this);
+                        return;
+                    }
+
+                    String dobPublic;
+                    if (isDobPublic) {
+                        dobPublic = "True";
+                    } else {
+                        dobPublic = "False";
                     }
 
                     RequestBody name = RequestBody.create(MultipartBody.FORM, fname);
@@ -180,8 +227,12 @@ public class RegistrationActivity extends AppCompatActivity {
                     RequestBody dis = RequestBody.create(MultipartBody.FORM, prov_dis_helper.disID(district));
                     RequestBody sex = RequestBody.create(MultipartBody.FORM, gender);
                     RequestBody occu = RequestBody.create(MultipartBody.FORM, occupation);
+                    RequestBody number = RequestBody.create(MultipartBody.FORM, phone);
+                    RequestBody biography = RequestBody.create(MultipartBody.FORM, b);
+                    RequestBody email = RequestBody.create(MultipartBody.FORM, mail);
+                    RequestBody status = RequestBody.create(MultipartBody.FORM, dobPublic);
 
-                    Call<ResponseBody> registerUser = apiInterface.RegisterUser(name, sur, db, prov, dis, sex, occu);
+                    Call<ResponseBody> registerUser = apiInterface.RegisterUser(name, sur, db, prov, dis, sex, occu, number,email,biography,status);
                     mProgress.setMessage("Registering...");
                     mProgress.setCanceledOnTouchOutside(false);
                     mProgress.setOnKeyListener((dialog, keyCode, event) -> false);
@@ -199,17 +250,7 @@ public class RegistrationActivity extends AppCompatActivity {
                                 if (message.equalsIgnoreCase("Account Already Exist")) {
                                     methods.showAlert("Response", "Looks like you are already registered.", RegistrationActivity.this);
                                 } else if (message.equalsIgnoreCase("Success")) {
-                                    methods.showAlert("Response", "Successfully registered.You are now a registered Activista.", RegistrationActivity.this);
-                                    //create account prefs
-                                    //SharedPreferences.Editor editor = sharedpreferences.edit();
-                                    //editor.putString(AccNo,account_no);
-                                    //editor.putInt(UserId,0);
-                                    //editor.putString(AccountType,"none");
-                                    //editor.putString(Level,"none");
-                                    //editor.putString(ProfileUrl,"none");
-                                    //editor.putBoolean(IsApproved,false);
-                                    //editor.putBoolean(IsLogged,false);
-                                    //editor.apply();
+                                    methods.showAlert("Response", "Successfully registered.Your account is pending approval.You can use Settings menu to check.", RegistrationActivity.this);
                                 } else if (message.equalsIgnoreCase("Failed")) {
                                     methods.showAlert("Response", "Registration failed.Please try again.", RegistrationActivity.this);
                                 } else if (message.equalsIgnoreCase("Error")) {

@@ -38,7 +38,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ApplyActivityActivity extends AppCompatActivity {
+public class ApplyOpportunityActivity extends AppCompatActivity {
 
     Intent mIntent;
     String mOpportunityID;
@@ -76,7 +76,7 @@ public class ApplyActivityActivity extends AppCompatActivity {
             mAttach.setOnClickListener(v -> {
                 try {
                     //check for file system permissions
-                    if (ContextCompat.checkSelfPermission(ApplyActivityActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                    if (ContextCompat.checkSelfPermission(ApplyOpportunityActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) ==
                             PackageManager.PERMISSION_GRANTED) {
 
                         File root1 = Environment.getExternalStorageDirectory();
@@ -88,49 +88,79 @@ public class ApplyActivityActivity extends AppCompatActivity {
                         long type = mDocType.getSelectedItemId();
                         if (type == 0) {
                             mDocuType = "cl";
+                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                            intent.addCategory(Intent.CATEGORY_OPENABLE);
+                            intent.setType("*/*");
+                            String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/pdf"};
+                            intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
+                            startActivityForResult(intent, FILE_SYSTEM);
                         } else if (type == 1) {
                             mDocuType = "ml";
+                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                            intent.addCategory(Intent.CATEGORY_OPENABLE);
+                            intent.setType("*/*");
+                            String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/pdf"};
+                            intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
+                            startActivityForResult(intent, FILE_SYSTEM);
                         } else if (type == 2) {
                             mDocuType = "cv";
+                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                            intent.addCategory(Intent.CATEGORY_OPENABLE);
+                            intent.setType("*/*");
+                            String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/pdf"};
+                            intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
+                            startActivityForResult(intent, FILE_SYSTEM);
+                        } else if (type == 3) {
+                            mDocuType = "motivid";
+                            Intent intent = new Intent(Intent.ACTION_PICK);
+                            intent.setType("video/*");
+                            startActivityForResult(intent, FILE_SYSTEM);
+                        } else if (type == 4) {
+                            mDocuType = "motipic";
+                            Intent intent = new Intent(Intent.ACTION_PICK);
+                            intent.setType("image/*");
+                            startActivityForResult(intent, FILE_SYSTEM);
+                        } else if (type == 5) {
+                            mDocuType = "motiaud";
+                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                            intent.setType("audio/*");
+                            startActivityForResult(intent, FILE_SYSTEM);
                         }
-                        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                        intent.addCategory(Intent.CATEGORY_OPENABLE);
-                        intent.setType("*/*");
-                        String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/pdf"};
-                        intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
-                        startActivityForResult(intent, FILE_SYSTEM);
+
                     } else {
                         //ask for it
                         askForPermission();
                     }
                 } catch (Exception e) {
-                    Toast.makeText(ApplyActivityActivity.this, "Error raising event.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ApplyOpportunityActivity.this, "Error raising event.", Toast.LENGTH_SHORT).show();
                 }
             });
             mUpload.setOnClickListener(v -> {
                 try {
                     if (mDocuType.equalsIgnoreCase("") || mDocuType == null) {
-                        methods.showAlert("Missing fields", "Enter all information.", ApplyActivityActivity.this);
+                        methods.showAlert("Missing fields", "Enter all information.", ApplyOpportunityActivity.this);
                         return;
                     }
 
                     SharedPreferences sharedPreferences = getSharedPreferences(RegistrationActivity.ACC_PREFERENCES, Context.MODE_PRIVATE);
                     String acctype = sharedPreferences.getString(RegistrationActivity.AccountType, "none");
                     if (acctype.equalsIgnoreCase("admin")) {
-                        methods.showAlert("Admin account", "You are an admin.", ApplyActivityActivity.this);
+                        methods.showAlert("Admin account", "You are an admin.", ApplyOpportunityActivity.this);
                     } else {
                         if (sharedPreferences.contains(RegistrationActivity.UserId)) {
                             int mUserId = sharedPreferences.getInt(RegistrationActivity.UserId, 0);
                             if (mUserId == 0) {
-                                methods.showAlert("Sign In required", "You need to sign in to be able to apply.", ApplyActivityActivity.this);
+                                methods.showAlert("Sign In required", "You need to sign in to be able to apply.", ApplyOpportunityActivity.this);
                             } else {
                                 postApplicationFile(mOpportunityID, String.valueOf(mUserId), mDocuType, mFilepathUri, file);
                             }
+                        } else {
+                            methods.showAlert("Sign In required", "You need to sign in to be able to apply.", ApplyOpportunityActivity.this);
                         }
                     }
 
                 } catch (Exception e) {
-                    Toast.makeText(ApplyActivityActivity.this, "Error raising event." + e.toString(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ApplyOpportunityActivity.this, "Error raising event." + e.toString(), Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -141,40 +171,63 @@ public class ApplyActivityActivity extends AppCompatActivity {
 
     private void askForPermission() {
         //get user permission to read/write file system
-        ActivityCompat.requestPermissions(ApplyActivityActivity.this,
+        ActivityCompat.requestPermissions(ApplyOpportunityActivity.this,
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, FILE_SYSTEM);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-        if (requestCode == FILE_SYSTEM) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                File root = Environment.getExternalStorageDirectory();
-                File base_dir = new File(root.getAbsolutePath() + getString(R.string.base_dir));
-                if (!base_dir.exists()) {
-                    base_dir.mkdirs();
-                }
-                long type = mDocType.getSelectedItemId();
-                if (type == 0) {
-                    mDocuType = "cl";
-                } else if (type == 1) {
-                    mDocuType = "ml";
-                } else if (type == 2) {
-                    mDocuType = "cv";
-                }
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("*/*");
-                String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/pdf"};
-                intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
-                startActivityForResult(intent, FILE_SYSTEM);
-            } else {
-                Toast.makeText(this, "You don't have permission to access file system !", Toast.LENGTH_SHORT).show();
-            }
-            return;
-        }
+//        if (requestCode == FILE_SYSTEM) {
+//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//
+//                File root = Environment.getExternalStorageDirectory();
+//                File base_dir = new File(root.getAbsolutePath() + getString(R.string.base_dir));
+//                if (!base_dir.exists()) {
+//                    base_dir.mkdirs();
+//                }
+//                long type = mDocType.getSelectedItemId();
+//                if (type == 0) {
+//                    mDocuType = "cl";
+//                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+//                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+//                    intent.setType("*/*");
+//                    String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/pdf"};
+//                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
+//                    startActivityForResult(intent, FILE_SYSTEM);
+//                } else if (type == 1) {
+//                    mDocuType = "ml";
+//                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+//                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+//                    intent.setType("*/*");
+//                    String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/pdf"};
+//                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
+//                    startActivityForResult(intent, FILE_SYSTEM);
+//                } else if (type == 2) {
+//                    mDocuType = "cv";
+//                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+//                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+//                    intent.setType("*/*");
+//                    String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/pdf"};
+//                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
+//                    startActivityForResult(intent, FILE_SYSTEM);
+//                } else if (type == 3) {
+//                    mDocuType = "motivid";
+//                    Intent intent = new Intent(Intent.ACTION_PICK);
+//                    intent.setType("video/*");
+//                    startActivityForResult(intent, FILE_SYSTEM);
+//                } else if (type == 4) {
+//                    mDocuType = "motipic";
+//                    Intent intent = new Intent(Intent.ACTION_PICK);
+//                    intent.setType("image/*");
+//                    startActivityForResult(intent, FILE_SYSTEM);
+//                }
+//
+//            } else {
+//                Toast.makeText(this, "You don't have permission to access file system !", Toast.LENGTH_SHORT).show();
+//            }
+//            return;
+//        }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
@@ -298,18 +351,18 @@ public class ApplyActivityActivity extends AppCompatActivity {
                         String message = methods.removeQoutes(result);
 
                         if (message.equalsIgnoreCase("Failed")) {
-                            methods.showAlert("Response", "Upload failed.Try again.", ApplyActivityActivity.this);
+                            methods.showAlert("Response", "Upload failed.Try again.", ApplyOpportunityActivity.this);
                         } else if (message.equalsIgnoreCase("Success")) {
-                            methods.showAlert("Response", "Upload successful.", ApplyActivityActivity.this);
+                            methods.showAlert("Response", "Upload successful.", ApplyOpportunityActivity.this);
 
                         } else if (message.equalsIgnoreCase("Error")) {
-                            methods.showAlert("Response", "Server error.", ApplyActivityActivity.this);
+                            methods.showAlert("Response", "Server error.", ApplyOpportunityActivity.this);
                         } else if (message.equalsIgnoreCase("Exist")) {
-                            methods.showAlert("Response", "There is another opportunity with the same details.", ApplyActivityActivity.this);
+                            methods.showAlert("Response", "There is another opportunity with the same details.", ApplyOpportunityActivity.this);
                         }
                         //Toast.makeText(RegistrationActivity.this, result, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
-                        Toast.makeText(ApplyActivityActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(ApplyOpportunityActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }
                 }
 
@@ -317,9 +370,9 @@ public class ApplyActivityActivity extends AppCompatActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     try {
                         methods.showDialog(mDialog, "dismiss", false);
-                        methods.showAlert("Request failed", "Request failed " + t.toString(), ApplyActivityActivity.this);
+                        methods.showAlert("Request failed", "Request failed " + t.toString(), ApplyOpportunityActivity.this);
                     } catch (Exception e) {
-                        Toast.makeText(ApplyActivityActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(ApplyOpportunityActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }
                 }
             });

@@ -11,6 +11,10 @@
         <item>Video</item>
         <item>Audio</item>
     </array>
+    <array name="account">
+        <item>My account</item>
+        <item>Other</item>
+    </array>
     <array name="dummy_provinces">
         <item>Manicaland</item>
         <item>Midlands</item>
@@ -36,6 +40,9 @@
         <item>Cover Letter</item>
         <item>Motivational Letter</item>
         <item>Curriculum Vitae</item>
+        <item>Motivation(video)</item>
+        <item>Motivation(pic)</item>
+        <item>Motivation(audio)</item>
     </array>
 
     <array name="upload_lib_files_mime_types">
@@ -50,5 +57,8 @@
         <item>Document(word)</item>
         <item>Document(power point)</item>
         <item>Document(excel)</item>
+        <item>Video Tutorial</item>
+        <item>Audio</item>
+        <item>Picture</item>
     </array>
 </resources>

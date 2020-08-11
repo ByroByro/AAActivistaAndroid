@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_view_cover_letter"
+        android:orderInCategory="100"
+        android:title="View Cover Letter"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_view_motivational_letter"
+        android:orderInCategory="100"
+        android:title="View Motivational Letter"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_view_cv"
+        android:orderInCategory="100"
+        android:title="View CV"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_view_motivational_vid"
+        android:orderInCategory="100"
+        android:title="View Motivational Video"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_view_motivational_pic"
+        android:orderInCategory="100"
+        android:title="View Motivational Pic"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_view_motivational_audio"
+        android:orderInCategory="100"
+        android:title="Listen Motivational Audio"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_view_in_app"
+        android:orderInCategory="100"
+        android:title="View Pic,Audio,Video In App"
+        app:showAsAction="never" />
+</menu>

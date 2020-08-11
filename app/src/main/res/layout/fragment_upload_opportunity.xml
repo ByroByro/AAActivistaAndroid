@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -45,8 +46,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Description"
-                android:lines="2"
-                android:inputType="textMultiLine" />
+                android:inputType="textMultiLine"
+                android:lines="2" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -65,6 +66,19 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
+            android:id="@+id/start_date"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="15dp"
+            android:background="@color/colorWhite"
+            android:text="Start date"
+            android:textAllCaps="false"
+            android:textColor="@color/grey"
+            android:textSize="20dp"
+            android:visibility="gone"/>
+
+        <Button
             android:id="@+id/closing_date"
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -75,6 +89,24 @@
             android:textAllCaps="false"
             android:textColor="@color/grey"
             android:textSize="20dp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/docs_link"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top|left"
+                android:hint="Google docs link(optional)"
+                android:inputType="textMultiLine"
+                android:lines="4"
+                android:maxLines="8"
+                android:scrollbars="vertical" />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/post"

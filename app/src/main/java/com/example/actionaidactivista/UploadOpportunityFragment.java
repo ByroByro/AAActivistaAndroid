@@ -44,6 +44,7 @@ public class UploadOpportunityFragment extends Fragment {
 
     private TextInputEditText mTitle;
     private TextInputEditText mDescription;
+    private TextInputEditText mGoogleDocsLink;
     private Button mClosingDate;
     private TextInputEditText mLocation;
     private Button mPost;
@@ -74,6 +75,7 @@ public class UploadOpportunityFragment extends Fragment {
             mTitle = (TextInputEditText) root.findViewById(R.id.title);
             mDescription = (TextInputEditText) root.findViewById(R.id.description);
             mLocation = (TextInputEditText) root.findViewById(R.id.location);
+            mGoogleDocsLink = (TextInputEditText) root.findViewById(R.id.docs_link);
             mClosingDate = (Button) root.findViewById(R.id.closing_date);
             mPost = (Button) root.findViewById(R.id.post);
             mDialog = new Dialog(getContext());
@@ -84,6 +86,7 @@ public class UploadOpportunityFragment extends Fragment {
                     String des = mDescription.getText().toString().trim();
                     String closingDate = mClosingDate.getText().toString().trim();
                     String location = mLocation.getText().toString().trim();
+                    String docs = mGoogleDocsLink.getText().toString().trim();
 
                     if (title.equalsIgnoreCase("") || des.equalsIgnoreCase("") || location.equalsIgnoreCase("")) {
                         methods.showAlert("Missing fields", "Enter all information.", getContext());
@@ -94,9 +97,19 @@ public class UploadOpportunityFragment extends Fragment {
                         methods.showAlert("Missing fields", "Enter closing date.", getContext());
                         return;
                     }
+                    String link;
+                    if (docs.equalsIgnoreCase("")) {
+                        link = "N/A";
+                    } else {
+                        link = docs;
+                    }
 
                     String dtePosted = methods.getDateForSqlServer();
-                    postActivity(title, des, dtePosted, methods.changeDateFormat(closingDate),location);
+                    if(!methods.checkOpportunityEndDate(dtePosted,closingDate)){
+                        methods.showAlert("Invalid Date !!","The closing date you have selected seem to be before the current date.",getContext());
+                        return;
+                    }
+                    postActivity(title, des, dtePosted, methods.changeDateFormat(closingDate), location,link);
 
                 } catch (Exception e) {
                     Toast.makeText(getContext(), "Error raising event.", Toast.LENGTH_SHORT).show();
@@ -135,15 +148,16 @@ public class UploadOpportunityFragment extends Fragment {
         return root;
     }
 
-    private void postActivity(String title, String des, String datePosted, String clsngDate, String location) {
+    private void postActivity(String title, String des, String datePosted, String clsngDate, String location,String link) {
         try {
             RequestBody postTitle = RequestBody.create(MultipartBody.FORM, title);
             RequestBody description = RequestBody.create(MultipartBody.FORM, des);
             RequestBody dtepost = RequestBody.create(MultipartBody.FORM, datePosted);
             RequestBody loca = RequestBody.create(MultipartBody.FORM, location);
             RequestBody clsdte = RequestBody.create(MultipartBody.FORM, clsngDate);
+            RequestBody doc_link = RequestBody.create(MultipartBody.FORM, link);
 
-            Call<ResponseBody> login = apiInterface.PostOpportunity(postTitle, description, dtepost, clsdte, loca);
+            Call<ResponseBody> login = apiInterface.PostOpportunity(postTitle, description, dtepost, clsdte, loca,doc_link);
             methods.showDialog(mDialog, "Posting opportunity...", true);
             login.enqueue(new Callback<ResponseBody>() {
                 @Override

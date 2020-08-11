@@ -26,7 +26,7 @@
             android:id="@+id/tip_card_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible"
+            android:visibility="gone"
             app:cardCornerRadius="10dp"
             app:cardElevation="5dp"
             app:cardUseCompatPadding="true">
@@ -58,6 +58,21 @@
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:layout_marginTop="15dp"
+            android:text="Activity Type"
+            android:textSize="15dp" />
+
+        <Spinner
+            android:id="@+id/activity_type"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="15dp">
+
+        </Spinner>
 
         <EditText
             android:id="@+id/description"
@@ -103,14 +118,34 @@
             android:text="Select media type"
             android:textSize="20dp" />
 
-        <Spinner
-            android:id="@+id/file_type"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="15dp"
-            android:entries="@array/mime_types">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
 
-        </Spinner>
+            <Spinner
+                android:id="@+id/file_type"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:entries="@array/mime_types">
+
+            </Spinner>
+
+            <ImageButton
+                android:id="@+id/attach_file"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="1dp"
+                android:layout_weight="3"
+                android:background="@color/colorWhite"
+                android:padding="4dp"
+                android:src="@drawable/ic_attachment"/>
+
+        </LinearLayout>
 
         <EditText
             android:id="@+id/text_content"
@@ -125,13 +160,14 @@
             android:scrollbars="vertical" />
 
         <Button
-            android:id="@+id/attach_file"
+            android:id="@+id/attach_file2"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginTop="10dp"
             android:background="@color/colorRed"
             android:text="Attach File"
             android:textAllCaps="false"
+            android:visibility="gone"
             android:textColor="@color/colorWhite"
             android:textSize="20dp" />
 
@@ -150,12 +186,14 @@
 
         <Button
             android:id="@+id/upload_activity"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="50dp"
+            android:layout_gravity="center"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="15dp"
             android:background="@color/colorRed"
             android:text="UPLOAD"
+            android:padding="10dp"
             android:textAllCaps="false"
             android:textColor="@color/colorWhite"
             android:textSize="20dp" />

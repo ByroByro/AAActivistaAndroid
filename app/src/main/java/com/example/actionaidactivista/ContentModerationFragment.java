@@ -4,14 +4,20 @@ package com.example.actionaidactivista;
 import android.app.Dialog;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
 
 import com.example.actionaidactivista.adapters.content_mod_feed_adapter;
@@ -73,6 +79,7 @@ public class ContentModerationFragment extends Fragment {
             apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
             mDialog = new Dialog(getContext());
 
+            setHasOptionsMenu(true);
             //get feeds
             getAllFeeds();
 
@@ -141,11 +148,56 @@ public class ContentModerationFragment extends Fragment {
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     methods.showDialog(mDialog, "Dismiss", false);
-                    methods.showAlert("List onFailure", t.toString(), getContext());
+                    methods.showAlert("Failure", t.toString(), getContext());
                 }
             });
         }catch (Exception e){
             Toast.makeText(getContext(),"Error raising get event",Toast.LENGTH_SHORT).show();
         }
+    }
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        try {
+            inflater.inflate(R.menu.search_menu, menu);
+            MenuItem item = menu.findItem(R.id.m_search);
+            SearchView searchView = (SearchView) item.getActionView();
+            searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    if (mFeedAdapter != null) {
+                        mFeedAdapter.getFilter().filter(newText);
+                    }
+                    return false;
+                }
+            });
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+
+        MenuItem item = menu.findItem(R.id.m_refresh);
+        item.setVisible(false);
+        super.onPrepareOptionsMenu(menu);
+    }
+
+    //onDestroy
+    @Override
+    public void onDestroy() {
+        try {
+            mFeedAdapter.releaseExoPlayer();
+        }catch (Exception e){
+            System.out.println(e);
+        }
+        super.onDestroy();
     }
 }

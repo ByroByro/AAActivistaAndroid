@@ -7,17 +7,17 @@
         android:title="Feed" />
 
     <item
-        android:id="@+id/navigation_library"
-        android:icon="@drawable/ic_local_library_black_24dp"
-        android:title="Library" />
+        android:id="@+id/action_social_media"
+        android:icon="@drawable/ic_people"
+        android:title="Social" />
 
     <item
-        android:id="@+id/navigation_contact"
-        android:icon="@drawable/ic_contact_phone_black"
-        android:title="Contacts" />
+        android:id="@+id/action_opportunities"
+        android:icon="@drawable/ic_plus_one"
+        android:title="Opportunities" />
 
     <item
-        android:id="@+id/navigation_upload"
-        android:icon="@drawable/ic_cloud_upload_black_24dp"
-        android:title="Upload" />
+        android:id="@+id/action_register"
+        android:icon="@drawable/ic_create"
+        android:title="Register" />
 </menu>

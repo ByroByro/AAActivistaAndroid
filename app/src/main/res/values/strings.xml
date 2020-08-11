@@ -23,6 +23,7 @@
     <string name="images">/TempImage</string>
     <string name="videos">/TempVideo</string>
     <string name="audios">/TempAudio</string>
+    <string name="temp_camera_image">/Camera Profile</string>
     <string name="temp">/Temp</string>
     <string name="downloads">/Downloads</string>
     <string name="registration_app_bar_title">Registration</string>
@@ -30,6 +31,7 @@
     <string name="content_moderation_bar_title"></string>
     <string name="library_app_bar_title">Library</string>
     <string name="search_title">Search</string>
+    <string name="profile_app_bar_title">Profile</string>
     <string name="contacts_app_bar_title">Contacts</string>
     <string name="upload_app_bar_title">Upload Activity</string>
     <string name="opportunities_app_bar_title">Opportunities</string>
@@ -37,8 +39,8 @@
     <string name="account_req">Account/Registration required</string>
     <string name="content_des">Image</string>
     <string name="browser_intent">Open With</string>
-    <string name="facebook_link">https://www.facebook.com</string>
-    <string name="twitter_link">https://www.twitter.com</string>
+    <string name="facebook_link">https://www.facebook.com/ActivistaZimbabwe/</string>
+    <string name="twitter_link">https://twitter.com/activista_zw</string>
     <string name="instagram_link">https://www.instagram.com</string>
 
     <!-- TODO: Remove or change this placeholder text -->

@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +24,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.actionaidactivista.R;
 import com.example.actionaidactivista.methods;
 import com.example.actionaidactivista.models.contact;
+import com.example.actionaidactivista.models.feed;
 import com.example.actionaidactivista.retrofit.ApiClient;
 import com.example.actionaidactivista.retrofit.ApiInterface;
 import com.google.gson.JsonParser;
@@ -31,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import okhttp3.MultipartBody;
@@ -44,6 +47,7 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
 
     private Context mContext;
     private List<contact> mContacts;
+    private List<contact> filtered_Contacts;
     //retrofit
     private ApiInterface apiInterface;
 
@@ -55,7 +59,45 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
         //initialise api interface
         apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
         mDialog = new Dialog(mContext);
+        this.filtered_Contacts = new ArrayList<>(list);
     }
+
+    public Filter getFilter() {
+        return filter;
+    }
+
+    Filter filter = new Filter() {
+
+        //run on a bg thread
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+
+            List<contact> filtered_items = new ArrayList<>();
+            if (constraint.toString().isEmpty()) {
+                filtered_items.addAll(filtered_Contacts);
+            } else {
+                for (contact item : filtered_Contacts) {
+                    if ((item.getmName() != null && item.getmName().toLowerCase().contains(constraint)) || (item.getmSurname() != null && item.getmSurname().toLowerCase().contains(constraint)
+                            || (item.getmStatus() != null && item.getmStatus().toLowerCase().contains(constraint)))) {
+                        filtered_items.add(item);
+                    }
+                }
+            }
+
+            FilterResults filterResults = new FilterResults();
+            filterResults.values = filtered_items;
+
+            return filterResults;
+        }
+
+        //run on UI thread
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            mContacts.clear();
+            mContacts.addAll((Collection<? extends contact>) results.values);
+            notifyDataSetChanged();
+        }
+    };
 
     @NonNull
     @Override
@@ -112,9 +154,15 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
                                 stringBuffer.append("Name : " + contact.getmName());
                                 stringBuffer.append("\nSurname : " + contact.getmSurname());
                                 stringBuffer.append("\nGender : " + contact.getmGender());
-                                stringBuffer.append("\nDate of Birth : " + contact.getmDob());
+                                if (contact.getmDobPublic().equalsIgnoreCase("True")) {
+                                    stringBuffer.append("\nDate of Birth : " + methods.getReadableDate(contact.getmDob(), mContext));
+                                } else {
+                                    stringBuffer.append("\nAge : " + methods.getAge(contact.getmDob(),mContext));
+                                }
                                 stringBuffer.append("\nOccupation : " + contact.getmOccupation());
+                                stringBuffer.append("\nPhone No : " + contact.getmPhone());
                                 stringBuffer.append("\nApproval status(IsApproved) : " + contact.getmStatus());
+                                stringBuffer.append("\nBiography : " + contact.getmBio());
                                 methods.showAlert("\nActivista Details", stringBuffer.toString(), mContext);
                             } else if (item.getItemId() == R.id.action_approve) {
                                 /*
@@ -139,7 +187,7 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
                                         if (contact.getmStatus().equalsIgnoreCase("Yes")) {
                                             methods.showAlert("Already approved", "The selected user is already approved.", mContext);
                                         } else {
-                                            actionOnApplication(contact.getmContactID(), "approve");
+                                            actionOnApplication(contact.getmContactID(), "approve", position);
                                         }
                                     } catch (Exception e) {
                                         System.out.println(e);
@@ -171,7 +219,7 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
                                         if (contact.getmStatus().equalsIgnoreCase("No")) {
                                             methods.showAlert("Already disapproved", "The selected user is already disapproved.", mContext);
                                         } else {
-                                            actionOnApplication(contact.getmContactID(), "disapprove");
+                                            actionOnApplication(contact.getmContactID(), "disapprove", position);
                                         }
                                     } catch (Exception e) {
                                         System.out.println(e);
@@ -198,7 +246,7 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
                                 //set positive button
                                 builder.setPositiveButton("Yes", (dialog, which) -> {
                                     try {
-                                        actionOnApplication(contact.getmContactID(), "delete");
+                                        actionOnApplication(contact.getmContactID(), "delete", position);
                                     } catch (Exception e) {
                                         System.out.println(e);
                                     }
@@ -247,7 +295,7 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
         }
     }
 
-    private void actionOnApplication(String userId, String action) {
+    private void actionOnApplication(String userId, String action, int position) {
         try {
             RequestBody id = RequestBody.create(MultipartBody.FORM, userId);
             RequestBody op = RequestBody.create(MultipartBody.FORM, action);
@@ -264,6 +312,17 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
                             //String result = parser.parse(responseData).getAsString();
                             String result = methods.removeQoutes(responseData);
                             if (result.equalsIgnoreCase("Success")) {
+                                if (action.equalsIgnoreCase("approve")) {
+                                    contact contact = mContacts.get(position);
+                                    contact.setmStatus("Yes");
+                                    notifyItemChanged(position);
+                                } else if (action.equalsIgnoreCase("disapprove")) {
+                                    contact contact = mContacts.get(position);
+                                    contact.setmStatus("No");
+                                    notifyItemChanged(position);
+                                } else if (action.equalsIgnoreCase("delete")) {
+                                    notifyItemRemoved(position);
+                                }
                                 methods.showAlert("Result", "Operation success.", mContext);
                             } else if (result.equalsIgnoreCase("Failed")) {
                                 methods.showAlert("Result", "Operation failed.Try later.", mContext);

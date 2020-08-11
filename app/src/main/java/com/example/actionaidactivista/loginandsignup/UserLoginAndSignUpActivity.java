@@ -27,7 +27,7 @@ import retrofit2.Response;
 
 public class UserLoginAndSignUpActivity extends AppCompatActivity {
 
-    private Button mSignUp;//signup button
+    private Button mSignUp;//sign up button
     private Button mLogin;//login button
     private TextInputEditText mAccount;//account no edit text
     private TextInputEditText mPassword;//password edit text
@@ -60,7 +60,7 @@ public class UserLoginAndSignUpActivity extends AppCompatActivity {
                         methods.showAlert("Missing info", "Enter all details", this);
                         return;
                     }
-                    signup(user, pass);
+                    sign_up(user, pass);
                 } catch (Exception e) {
                     Toast.makeText(UserLoginAndSignUpActivity.this, "Error raising event.", Toast.LENGTH_SHORT).show();
                 }
@@ -90,10 +90,10 @@ public class UserLoginAndSignUpActivity extends AppCompatActivity {
         startActivity(home);
     }
 
-    //signup method
-    private void signup(String acc, String pass) {
+    //sign up method
+    private void sign_up(String acc, String pass) {
         try {
-            RequestBody accno = RequestBody.create(MultipartBody.FORM, acc);
+            RequestBody accno = RequestBody.create(MultipartBody.FORM, acc.toUpperCase());
             RequestBody password = RequestBody.create(MultipartBody.FORM, pass);
             Call<ResponseBody> userSignUp = apiInterface.UserSignUp(accno, password);
             methods.showDialog(mDialog, "Signing up...", true);
@@ -139,7 +139,7 @@ public class UserLoginAndSignUpActivity extends AppCompatActivity {
     }
     private void login(String user, String pass) {
         try {
-            RequestBody username = RequestBody.create(MultipartBody.FORM, user);
+            RequestBody username = RequestBody.create(MultipartBody.FORM, user.toUpperCase());
             RequestBody password = RequestBody.create(MultipartBody.FORM, pass);
             Call<ResponseBody> login = apiInterface.UserLogin(username, password);
             methods.showDialog(mDialog, "Signing in...", true);
@@ -150,27 +150,32 @@ public class UserLoginAndSignUpActivity extends AppCompatActivity {
                         methods.showDialog(mDialog, "dismiss", false);
                         String result = response.body().string();
 
-                        String[] tokens = methods.removeQoutes(result).split(":");
+                        String[] tokens = methods.removeQoutes(result).split(";");
                         String message = tokens[0];
 
                         if (message.equalsIgnoreCase("Invalid username or password")) {
                             methods.showAlert("Response", "Invalid username or password.", UserLoginAndSignUpActivity.this);
                         } else if (message.equalsIgnoreCase("Success")) {
-                            methods.showAlert("Response", "Sign in successful.", UserLoginAndSignUpActivity.this);
+                            //methods.showAlert("Response", "Sign in successful.", UserLoginAndSignUpActivity.this);
+                            Toast.makeText(UserLoginAndSignUpActivity.this,"Login Successful",Toast.LENGTH_LONG).show();
                             String acc_type = tokens[1];
                             String user_id = tokens[2];
+                            String pic = tokens[3];
                             //create account prefs
                             SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString(RegistrationActivity.AccNo,user);
+                            editor.putString(RegistrationActivity.AccNo,user.toUpperCase());
                             editor.putInt(RegistrationActivity.UserId,Integer.parseInt(user_id));
                             editor.putString(RegistrationActivity.AccountType,acc_type);
                             editor.putString(RegistrationActivity.Level,"activista");
-                            editor.putString(RegistrationActivity.ProfileUrl,"none");
+                            editor.putString(RegistrationActivity.ProfileUrl,pic);
                             editor.putBoolean(RegistrationActivity.IsLogged,true);
                             editor.apply();
                             //clear edit texts
                             mAccount.setText("");
                             mPassword.setText("");
+                            Intent main = new Intent(UserLoginAndSignUpActivity.this, MainBottomNavActivity.class);
+                            main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            UserLoginAndSignUpActivity.this.startActivity(main);
                         } else if (message.equalsIgnoreCase("Error")) {
                             methods.showAlert("Response", "Server error.", UserLoginAndSignUpActivity.this);
                         }

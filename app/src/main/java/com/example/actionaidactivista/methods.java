@@ -6,15 +6,21 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.view.KeyEvent;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bumptech.glide.request.RequestOptions;
+import com.example.actionaidactivista.logic.DownloadProgress;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class methods {
+public class methods extends DownloadProgress {
+
     public static void showAlert(String title, String Message, Context context) {
         try {
             final AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -73,6 +79,19 @@ public class methods {
         return overAge;
     }
 
+    public static String getAge(String dateofbirth, Context ctx) {
+        String age = "none";
+        try {
+            String[] tokens = dateofbirth.split(" ");
+            String[] tkns = tokens[0].split("/");
+            int a = currentYear(ctx) - Integer.parseInt(tkns[2]);
+            age = String.valueOf(a);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return age;
+    }
+
     public static String changeDateFormat(String date) {
         String newformat = "";
         try {
@@ -128,12 +147,22 @@ public class methods {
         return dateFormat.format(date);
     }
 
-    public static String getFileNameFromUrl(String uri, Context context) {
+    public static String getFileNameFromUrl(String url, Context context) {
         String name = "";
         try {
-            name = uri.substring(uri.lastIndexOf('/') + 1, uri.length());
+            name = url.substring(url.lastIndexOf('/') + 1);
         } catch (Exception e) {
             Toast.makeText(context, "Error getting filename.", Toast.LENGTH_SHORT).show();
+        }
+        return name;
+    }
+
+    public static String getExtensionFromUrl(String url, Context ctx) {
+        String name = "";
+        try {
+            name = url.substring(url.lastIndexOf('.') + 1);
+        } catch (Exception e) {
+            Toast.makeText(ctx, "Error getting ext.", Toast.LENGTH_SHORT).show();
         }
         return name;
     }
@@ -193,6 +222,24 @@ public class methods {
                 }
             } else {
                 res = "unloged";
+            }
+        } catch (Exception e) {
+            //methods.showAlert("Error",e.toString(),ctx);
+            res = "error";
+            return res;
+        }
+        return res;
+    }
+
+    public static String getUserProfile(Context ctx) {
+        String res;
+        try {
+            SharedPreferences sharedPreferences = ctx.getSharedPreferences(RegistrationActivity.ACC_PREFERENCES, Context.MODE_PRIVATE);
+            //check if the preference is there
+            if (sharedPreferences.contains(RegistrationActivity.ProfileUrl)) {
+                res = sharedPreferences.getString(RegistrationActivity.ProfileUrl, "none");
+            } else {
+                res = "none";
             }
         } catch (Exception e) {
             //methods.showAlert("Error",e.toString(),ctx);
@@ -331,5 +378,84 @@ public class methods {
             System.out.println(e);
         }
         return res;
+    }
+
+    /*
+     * compare date posted and end date for opportunity,if end date is less
+     * tha date posted then deny
+     */
+    public static boolean checkOpportunityEndDate(String date_posted, String closing_date) {
+        boolean res = false;
+        try {
+            String[] start = date_posted.split("-");
+            String[] end = closing_date.split("-");
+            //start
+            String start_year = start[0];
+            String start_mon = start[1];
+            String start_day = start[2];
+            //end
+            String end_year = end[2];
+            String end_mon = end[1];
+            String end_day = end[0];
+
+            if (Integer.parseInt(end_year) > Integer.parseInt(start_year)) {
+                res = true;
+            } else if (Integer.parseInt(end_year) == Integer.parseInt(start_year)) {
+                if (Integer.parseInt(end_mon) > Integer.parseInt(start_mon)) {
+                    res = true;
+                } else if (Integer.parseInt(end_mon) == Integer.parseInt(start_mon)) {
+                    if (Integer.parseInt(end_day) > Integer.parseInt(start_day)) {
+                        res = true;
+                    } else if (Integer.parseInt(end_day) == Integer.parseInt(start_day)) {
+                        res = false;
+                    } else {
+                        res = false;
+                    }
+                } else {
+                    res = false;
+                }
+            } else {
+                res = false;
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return res;
+    }
+
+    /*
+     * check for network
+     */
+    public static boolean isConnected(Context ctx) {
+        boolean isConnected = false;
+        try {
+            ConnectivityManager cm = (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+            //if there is a network
+            if (activeNetwork != null) {
+                if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI || activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
+                    isConnected = true;
+                } else if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI && activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
+                    isConnected = true;
+                }
+            } else {
+                isConnected = false;
+            }
+        } catch (Exception e) {
+            showAlert("No network", "You have no internet connection", ctx);
+        }
+        return isConnected;
+    }
+
+    /*
+     * default request options for glide
+     */
+    public static RequestOptions requestOptions(int resource) {
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions.centerCrop();
+        requestOptions.placeholder(resource);
+        requestOptions.error(resource);
+        return requestOptions;
     }
 }

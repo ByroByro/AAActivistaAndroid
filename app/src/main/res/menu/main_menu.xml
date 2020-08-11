@@ -14,54 +14,78 @@
     <item
         android:id="@+id/action_application_approval"
         android:orderInCategory="100"
-        android:visible="false"
         android:title="Activista Approval"
+        android:visible="false"
         app:showAsAction="never" />
+
     <item
-        android:id="@+id/action_register"
+        android:id="@+id/action_library"
+        android:title="Library"
         android:orderInCategory="100"
-        android:title="Register"
+        android:visible="false"
         app:showAsAction="never" />
+
     <item
-        android:id="@+id/action_opportunities"
+        android:id="@+id/action_members"
+        android:title="Members"
         android:orderInCategory="100"
-        android:title="Opportunities"
+        android:visible="false"
         app:showAsAction="never" />
+
     <item
-        android:id="@+id/action_social_media"
+        android:id="@+id/action_alumni_members"
+        android:title="Alumni"
         android:orderInCategory="100"
-        android:title="Social Media"
+        android:visible="false"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_upload"
+        android:title="Upload Activity"
+        android:orderInCategory="100"
+        android:visible="false"
+        app:showAsAction="never" />
+
     <item
         android:id="@+id/action_upload_library_material"
         android:orderInCategory="100"
-        android:visible="false"
         android:title="Upload Library Material"
+        android:visible="false"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_moderate_content"
         android:orderInCategory="100"
-        android:visible="false"
         android:title="Content Moderation"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_subscriber_monitor"
+        android:orderInCategory="100"
+        android:title="Subscriber Monitor"
+        android:visible="false"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_upload_opportunity"
         android:orderInCategory="100"
-        android:visible="false"
         android:title="Upload Opportunity"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/action_subscriber_monitor"
-        android:orderInCategory="100"
         android:visible="false"
-        android:title="Subscriber Monitor"
         app:showAsAction="never" />
+
     <item
         android:id="@+id/action_view_opportunity_applications"
         android:orderInCategory="100"
-        android:visible="false"
         android:title="Opportunity Applications"
+        android:visible="false"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_view_reported_comments"
+        android:orderInCategory="100"
+        android:title="Reported Comments"
+        android:visible="false"
+        app:showAsAction="never" />
+
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"

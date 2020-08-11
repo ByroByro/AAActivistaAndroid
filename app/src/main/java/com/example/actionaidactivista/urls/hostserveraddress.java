@@ -12,4 +12,10 @@ public class hostserveraddress {
     public static String SERVER_ADDRESS() {
         return "http://192.168.43.185:81";
     }
+
+    //ONLINE SERVER
+    public static String BASE_SERVER_URL() {
+        return "http://196.201.6.203/AAActivista/api/";
+    }
+
 }
