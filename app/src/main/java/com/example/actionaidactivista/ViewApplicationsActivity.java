@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -43,6 +44,15 @@ public class ViewApplicationsActivity extends AppCompatActivity {
     //retrofit
     private ApiInterface apiInterface;
 
+    //variables for pagination
+    private boolean isLoading = true;
+    private int pastVisibleItems, visibleItemCount, totalItemCount, previousTotal = 0;
+    private int view_threshold = 0;
+    private int row_num = 30;
+    private int page_num = 1;
+
+    String id;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,12 +71,36 @@ public class ViewApplicationsActivity extends AppCompatActivity {
             mRecyclerView.setItemAnimator(new DefaultItemAnimator());
             apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
             mDialog = new Dialog(this);
+            //on scroll listener
+            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    visibleItemCount = linearLayoutManager.getChildCount();
+                    totalItemCount = linearLayoutManager.getItemCount();
+                    pastVisibleItems = linearLayoutManager.findFirstVisibleItemPosition();
 
+                    if (dy > 0) {
+                        if (isLoading) {
+                            if (totalItemCount > previousTotal) {
+                                isLoading = false;
+                                previousTotal = totalItemCount;
+                            }
+                        }
+
+                        if (!isLoading && (totalItemCount - visibleItemCount) <= (pastVisibleItems + view_threshold)) {
+                            page_num++;
+                            getApplicationsPagination(id);
+                            isLoading = true;
+                        }
+                    }
+                }
+            });
             //get id
             Intent intent = getIntent();
-            String id = intent.getStringExtra("opp_id");
+            id = intent.getStringExtra("opp_id");
             getApplications(id);
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
     }
@@ -74,12 +108,12 @@ public class ViewApplicationsActivity extends AppCompatActivity {
     //method for getting opportunity applications
     private void getApplications(String id) {
         try {
-            RequestBody page = RequestBody.create(MultipartBody.FORM, "1");
-            RequestBody rows = RequestBody.create(MultipartBody.FORM, "5");
+            RequestBody page = RequestBody.create(MultipartBody.FORM, String.valueOf(page_num));
+            RequestBody rows = RequestBody.create(MultipartBody.FORM, String.valueOf(row_num));
 
             RequestBody opid = RequestBody.create(MultipartBody.FORM, id);
 
-            Call<ResponseBody> opps = apiInterface.GetAplications(opid);
+            Call<ResponseBody> opps = apiInterface.GetApplicants(opid, rows, page);
             methods.showDialog(mDialog, "Loading applications...", true);
             opps.enqueue(new Callback<ResponseBody>() {
                 @Override
@@ -91,12 +125,12 @@ public class ViewApplicationsActivity extends AppCompatActivity {
                             JsonParser parser = new JsonParser();
                             String result = parser.parse(responseData).getAsString();
                             if (result.length() == 0) {
-                                Toast.makeText(ViewApplicationsActivity.this, "No more data.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ViewApplicationsActivity.this, "No data.", Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             JSONArray array = new JSONArray(result);
                             if (array.length() == 0) {
-                                Toast.makeText(ViewApplicationsActivity.this, "No more data.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ViewApplicationsActivity.this, "No data.", Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             mList = new ArrayList<>();
@@ -133,7 +167,76 @@ public class ViewApplicationsActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     methods.showDialog(mDialog, "Dismiss", false);
-                    methods.showAlert("Failure", t.toString(), ViewApplicationsActivity.this);
+                    methods.showRequestFailedDialog(ViewApplicationsActivity.this);
+                }
+            });
+        } catch (Exception e) {
+            methods.showAlert("Failure", e.toString(), ViewApplicationsActivity.this);
+        }
+    }
+
+    //method for getting more opportunity applications
+    private void getApplicationsPagination(String id) {
+        try {
+            RequestBody page = RequestBody.create(MultipartBody.FORM, String.valueOf(page_num));
+            RequestBody rows = RequestBody.create(MultipartBody.FORM, String.valueOf(row_num));
+
+            RequestBody opid = RequestBody.create(MultipartBody.FORM, id);
+
+            Call<ResponseBody> opps = apiInterface.GetApplicants(opid, rows, page);
+            methods.showDialog(mDialog, "Loading more applications...", true);
+            opps.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    try {
+                        methods.showDialog(mDialog, "Dismiss", false);
+                        if (response.isSuccessful()) {
+                            String responseData = response.body().string();
+                            JsonParser parser = new JsonParser();
+                            String result = parser.parse(responseData).getAsString();
+                            if (result.length() == 0) {
+                                Toast.makeText(ViewApplicationsActivity.this, "No more data.", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            JSONArray array = new JSONArray(result);
+                            if (array.length() == 0) {
+                                Toast.makeText(ViewApplicationsActivity.this, "No more data.", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            List<applications> list = new ArrayList<>();
+                            applications opportunity;
+                            for (int i = 0; i < array.length(); i++) {
+                                JSONObject jsonObject = array.getJSONObject(i);
+                                opportunity = new applications();
+                                opportunity.setName(jsonObject.getString("fname"));
+                                opportunity.setSurname(jsonObject.getString("sname"));
+                                opportunity.setGender(jsonObject.getString("gender"));
+                                opportunity.setId(jsonObject.getString("id"));
+                                opportunity.setPostid(jsonObject.getString("postid"));
+                                opportunity.setApplicantid(jsonObject.getString("applicantid"));
+                                opportunity.setCoverletterurl(jsonObject.getString("coverletterurl"));
+                                opportunity.setMotiletterurl(jsonObject.getString("motiletterurl"));
+                                opportunity.setCvurl(jsonObject.getString("cvurl"));
+                                opportunity.setMotivideourl(jsonObject.getString("motivideourl"));
+                                opportunity.setMotipicurl(jsonObject.getString("motipicurl"));
+                                opportunity.setAudio(jsonObject.getString("motiaudurl"));
+                                list.add(opportunity);
+                            }
+
+                            mAdapter.addApplicant(list);
+                        } else {
+                            Toast.makeText(ViewApplicationsActivity.this, "Request unsuccessful", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        System.out.println(e);
+                        methods.showAlert("Error", e.toString(), ViewApplicationsActivity.this);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    methods.showDialog(mDialog, "Dismiss", false);
+                    methods.showRequestFailedDialog(ViewApplicationsActivity.this);
                 }
             });
         } catch (Exception e) {
@@ -168,6 +271,7 @@ public class ViewApplicationsActivity extends AppCompatActivity {
         }
         return true;
     }
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         try {

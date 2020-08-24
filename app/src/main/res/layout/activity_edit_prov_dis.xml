@@ -62,10 +62,11 @@
                     android:layout_gravity="center"
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="15dp"
-                    android:background="@color/colorRed"
+                    android:background="@drawable/custom_button_red"
                     android:text="Update"
-                    android:textAllCaps="false"
+                    android:padding="6dp"
                     android:textColor="@color/colorWhite"
+                    android:textAllCaps="false"
                     android:textSize="20dp" />
 
             </LinearLayout>

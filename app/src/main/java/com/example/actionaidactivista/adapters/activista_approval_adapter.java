@@ -3,13 +3,20 @@ package com.example.actionaidactivista.adapters;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Filter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,13 +31,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.actionaidactivista.R;
 import com.example.actionaidactivista.methods;
 import com.example.actionaidactivista.models.contact;
-import com.example.actionaidactivista.models.feed;
 import com.example.actionaidactivista.retrofit.ApiClient;
 import com.example.actionaidactivista.retrofit.ApiInterface;
-import com.google.gson.JsonParser;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,6 +54,7 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
     private ApiInterface apiInterface;
 
     private Dialog mDialog;
+    private Dialog dialog;
 
     public activista_approval_adapter(List<contact> list, Context ctx) {
         this.mContacts = list;
@@ -59,6 +62,7 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
         //initialise api interface
         apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
         mDialog = new Dialog(mContext);
+        dialog = new Dialog(mContext);
         this.filtered_Contacts = new ArrayList<>(list);
     }
 
@@ -121,21 +125,21 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
             if (!contact.getmProfileUrl().equalsIgnoreCase("N/A")) {
                 RequestOptions requestOptions = new RequestOptions();
                 requestOptions.centerCrop();
-                requestOptions.placeholder(R.drawable.ic_contacts_red);
-                requestOptions.error(R.drawable.ic_contacts_red);
+                requestOptions.placeholder(R.drawable.ic_account_circle);
+                requestOptions.error(R.drawable.ic_account_circle);
 
                 Glide.with(mContext)
                         .applyDefaultRequestOptions(requestOptions)
                         .load(contact.getmProfileUrl())
                         .into(holder.mProfile);
             } else {
-                holder.mProfile.setImageResource(R.drawable.ic_contacts_red);
+                holder.mProfile.setImageResource(R.drawable.ic_account_circle);
             }
-            holder.mCardView.setOnClickListener(v -> {
+            holder.mMore.setOnClickListener(v -> {
                 try {
 
                     //Creating the instance of PopupMenu
-                    final PopupMenu popup = new PopupMenu(mContext, holder.mCardView, Gravity.CENTER);
+                    final PopupMenu popup = new PopupMenu(mContext, holder.mMore, Gravity.CENTER);
                     //Inflating the Popup using xml file
                     popup.getMenuInflater().inflate(R.menu.approval_menu, popup.getMenu());
 
@@ -156,14 +160,15 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
                                 stringBuffer.append("\nGender : " + contact.getmGender());
                                 if (contact.getmDobPublic().equalsIgnoreCase("True")) {
                                     stringBuffer.append("\nDate of Birth : " + methods.getReadableDate(contact.getmDob(), mContext));
+                                    stringBuffer.append("\nAge : " + methods.getAge(contact.getmDob(), mContext));
                                 } else {
-                                    stringBuffer.append("\nAge : " + methods.getAge(contact.getmDob(),mContext));
+                                    stringBuffer.append("\nAge : " + methods.getAge(contact.getmDob(), mContext));
                                 }
                                 stringBuffer.append("\nOccupation : " + contact.getmOccupation());
                                 stringBuffer.append("\nPhone No : " + contact.getmPhone());
                                 stringBuffer.append("\nApproval status(IsApproved) : " + contact.getmStatus());
                                 stringBuffer.append("\nBiography : " + contact.getmBio());
-                                methods.showAlert("\nActivista Details", stringBuffer.toString(), mContext);
+                                methods.showAlert("\nMember Details", stringBuffer.toString(), mContext);
                             } else if (item.getItemId() == R.id.action_approve) {
                                 /*
                                  * prompt if user is sure to approve if yes then approve,
@@ -254,6 +259,47 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
 
                                 AlertDialog dialog = builder.create();
                                 dialog.show();
+                            } else if (item.getItemId() == R.id.action_identity_verification) {
+                                if(!contact.getmDoc_type().equalsIgnoreCase("n/a")) {
+                                    if (contact.getmDoc_type().equalsIgnoreCase("image")) {
+                                        dialog.setContentView(R.layout.change_profile_dialog);
+                                        ImageView imageView = dialog.findViewById(R.id.fullImage);
+                                        Button cancel = dialog.findViewById(R.id.cancel);
+                                        Button ok = dialog.findViewById(R.id.ok);
+                                        cancel.setVisibility(View.GONE);
+                                        ok.setText("Dismiss");
+                                        //dialog.setCanceledOnTouchOutside(false);
+                                        dialog.setOnKeyListener((dialog, keyCode, event) -> {
+                                            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                                                dialog.dismiss();
+                                            }
+                                            return true;
+                                        });
+
+                                        RequestOptions requestOptions = new RequestOptions();
+                                        requestOptions.centerCrop();
+                                        requestOptions.placeholder(R.drawable.ic_account_circle);
+                                        requestOptions.error(R.drawable.ic_account_circle);
+
+                                        Glide.with(mContext)
+                                                .applyDefaultRequestOptions(requestOptions)
+                                                .load(contact.getmDoc_url())
+                                                .into(imageView);
+
+                                        ok.setOnClickListener(v2 -> {
+                                            dialog.dismiss();
+                                        });
+
+                                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                        dialog.show();
+                                    } else {
+                                        Intent open = new Intent(Intent.ACTION_VIEW);
+                                        open.setData(Uri.parse(contact.getmDoc_url()));
+                                        mContext.startActivity(open);
+                                    }
+                                }else {
+                                    Toast.makeText(mContext, "No doc.", Toast.LENGTH_SHORT).show();
+                                }
                             }
                         } catch (Exception e) {
                             Toast.makeText(mContext, "Error loading popup.", Toast.LENGTH_SHORT).show();
@@ -284,6 +330,7 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
         public CardView mCardView;
         public ImageView mProfile;
         public TextView mStatus;
+        public ImageButton mMore;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -292,9 +339,23 @@ public class activista_approval_adapter extends RecyclerView.Adapter<activista_a
             mProfile = itemView.findViewById(R.id.imageView);
             mCardView = itemView.findViewById(R.id.contact_card_view);
             mStatus = itemView.findViewById(R.id.status);
+            mMore = itemView.findViewById(R.id.more);
         }
     }
 
+    //add more members
+    public void addMember(List<contact> list) {
+        try {
+            for (contact m : list) {
+                mContacts.add(m);
+            }
+            notifyDataSetChanged();
+        } catch (Exception e) {
+            Toast.makeText(mContext, "Add feed error in adapter", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //delete,approve etc
     private void actionOnApplication(String userId, String action, int position) {
         try {
             RequestBody id = RequestBody.create(MultipartBody.FORM, userId);

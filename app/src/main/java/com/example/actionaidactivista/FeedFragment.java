@@ -230,14 +230,14 @@ public class FeedFragment extends Fragment {
                             JsonParser parser = new JsonParser();
                             String result = parser.parse(responseData).getAsString();
                             if (result.length() == 0) {
-                                Toast.makeText(getContext(), "No more feeds.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "No feeds.", Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             JSONArray array = new JSONArray(result);
                             if (array.length() == 0) {
-                                Snackbar.make(rootLayout, "There are no feeds or no more feeds", Snackbar.LENGTH_SHORT).show();
+                                //Snackbar.make(rootLayout, "There are no feeds or no more feeds", Snackbar.LENGTH_SHORT).show();
                                 //methods.showAlert("No more content", "There are no feeds or no more feeds", getContext());
-                                //Toast.makeText(getContext(), "No more feeds.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "No feeds.", Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             mList = new ArrayList<>();
@@ -269,7 +269,7 @@ public class FeedFragment extends Fragment {
                                     toCache.add(feed);
                                 }
                             }
-                            mFeedAdapter = new feed_adapter(mList, getContext(), true);
+                            mFeedAdapter = new feed_adapter(mList, getContext(), true,rootLayout);
                             mActivitiesRecyclerView.setAdapter(mFeedAdapter);
 
                             //save to local database as cache
@@ -336,9 +336,9 @@ public class FeedFragment extends Fragment {
                             }
                             JSONArray array = new JSONArray(result);
                             if (array.length() == 0) {
-                                Snackbar.make(rootLayout, "There are no feeds or no more feeds", Snackbar.LENGTH_SHORT).show();
+                                //Snackbar.make(rootLayout, "There are no feeds or no more feeds", Snackbar.LENGTH_SHORT).show();
                                 //methods.showAlert("No more content", "There are no feeds or no more feeds", getContext());
-                                //Toast.makeText(getContext(), "No more feeds.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "No more feeds.", Toast.LENGTH_SHORT).show();
                                 return;
                             }
 
@@ -360,6 +360,10 @@ public class FeedFragment extends Fragment {
                                 feed.setmLocation(jsonObject.getString("location"));
                                 feed.setmGeoLocation(jsonObject.getString("geolocation"));
                                 feed.setmUploaderId(jsonObject.getString("userid"));
+                                feed.setNoOfLikes(jsonObject.getString("nooflikes"));
+                                feed.setUploaderName(jsonObject.getString("firstname"));
+                                feed.setUploaderSurname(jsonObject.getString("surname"));
+                                feed.setUploaderProfile(jsonObject.getString("profile"));
                                 moreFeeds.add(feed);
                             }
 
@@ -390,6 +394,7 @@ public class FeedFragment extends Fragment {
      */
     private void saveFeedsToCache(ArrayList<feed> list) {
         try {
+            feed_cache.deleteAllRecordsFromTable("Feeds_table");
             for (feed f : list) {
                 feed_cache.insertFeed(f);
             }
@@ -427,10 +432,11 @@ public class FeedFragment extends Fragment {
 
                     handler.post(() -> {
                         try {
-                            mFeedAdapter = new feed_adapter(mList, getContext(), false);
+                            mFeedAdapter = new feed_adapter(mList, getContext(), false,rootLayout);
                             mActivitiesRecyclerView.setAdapter(mFeedAdapter);
                             if (mFeedAdapter.getItemCount() > 0 && !mFeedAdapter.isOnline) {
-                                Snackbar.make(rootLayout, "VIEWING OFFLINE DATA", Snackbar.LENGTH_SHORT).show();
+                                //Snackbar.make(rootLayout, "VIEWING OFFLINE DATA", Snackbar.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "VIEWING OFFLINE DATA.", Toast.LENGTH_SHORT).show();
                             }
                         }catch (Exception e){
                             System.out.println(e);

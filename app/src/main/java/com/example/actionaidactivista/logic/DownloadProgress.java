@@ -20,10 +20,6 @@ public class DownloadProgress {
     private ImageButton cancel;
     private Context context;
 
-    public DownloadProgress(){
-
-    }
-
     public DownloadProgress(Dialog dialog, Context ctx) {
         this.dialog = dialog;
         this.context = ctx;

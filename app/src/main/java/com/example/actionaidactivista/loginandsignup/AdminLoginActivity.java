@@ -128,7 +128,7 @@ public class AdminLoginActivity extends AppCompatActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     try {
                         methods.showDialog(mDialog,"dismiss",false);
-                        methods.showAlert("Request failed", "Request failed " + t.toString(), AdminLoginActivity.this);
+                        methods.showAlert("Request failed", "Request failed..Check your network connection.", AdminLoginActivity.this);
                     } catch (Exception e) {
                         Toast.makeText(AdminLoginActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }

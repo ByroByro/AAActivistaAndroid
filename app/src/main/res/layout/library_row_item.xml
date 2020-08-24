@@ -23,7 +23,6 @@
             android:layout_marginBottom="1dp"
             android:lines="1"
             android:text="Title"
-            android:textColor="@android:color/black"
             android:textSize="15dp" />
 
 
@@ -36,7 +35,6 @@
             android:layout_marginBottom="1dp"
             android:lines="1"
             android:text="Author"
-            android:textColor="@android:color/black"
             android:textSize="15dp" />
 
         <Button

@@ -17,6 +17,42 @@ public class contact {
     private String mEmail;
     private String mBio;
     private String mDobPublic;
+    private String mDoc_url;
+    private String mDoc_path;
+    private String mDoc_type;
+    private String mJoin_date;
+
+    public String getmDoc_url() {
+        return mDoc_url;
+    }
+
+    public void setmDoc_url(String mDoc_url) {
+        this.mDoc_url = mDoc_url;
+    }
+
+    public String getmDoc_path() {
+        return mDoc_path;
+    }
+
+    public void setmDoc_path(String mDoc_path) {
+        this.mDoc_path = mDoc_path;
+    }
+
+    public String getmDoc_type() {
+        return mDoc_type;
+    }
+
+    public void setmDoc_type(String mDoc_type) {
+        this.mDoc_type = mDoc_type;
+    }
+
+    public String getmJoin_date() {
+        return mJoin_date;
+    }
+
+    public void setmJoin_date(String mJoin_date) {
+        this.mJoin_date = mJoin_date;
+    }
 
     public String getmPhone() {
         return mPhone;

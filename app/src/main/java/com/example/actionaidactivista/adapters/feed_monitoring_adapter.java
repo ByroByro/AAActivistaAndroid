@@ -27,7 +27,7 @@ public class feed_monitoring_adapter extends RecyclerView.Adapter<feed_monitorin
     private List<feedmonitor> mContacts;
     private String mCategory;
 
-    public feed_monitoring_adapter(List<feedmonitor> list, Context ctx,String cate){
+    public feed_monitoring_adapter(List<feedmonitor> list, Context ctx, String cate) {
         this.mContacts = list;
         this.mContext = ctx;
         this.mCategory = cate;
@@ -47,15 +47,25 @@ public class feed_monitoring_adapter extends RecyclerView.Adapter<feed_monitorin
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        try{
+        try {
             feedmonitor user = mContacts.get(position);
-            holder.mName.setText("Name : " + user.getFname() + " " + user.getSname());
-            if(mCategory.equalsIgnoreCase("byfeedsuploaded")) {
+            holder.mName.setText(user.getFname() + " " + user.getSname());
+            if (mCategory.equalsIgnoreCase("byfeedsuploaded")) {
                 holder.mPhone.setText("No of feeds/activities : " + user.getNooffeeds());
-            } else if(mCategory.equalsIgnoreCase("bytags")){
+                if (!user.getLast_date().equalsIgnoreCase("n/a")) {
+                    holder.mLast_date.setVisibility(View.VISIBLE);
+                    holder.mLast_date.setText("Last posted " + methods.getReadableDate(user.getLast_date(), mContext));
+                }
+            } else if (mCategory.equalsIgnoreCase("bytags")) {
                 holder.mPhone.setText("No of feeds/activities tagged in : " + user.getNooffeeds());
-            } else if(mCategory.equalsIgnoreCase("byfeedlikes")){
+            } else if (mCategory.equalsIgnoreCase("byfeedlikes")) {
                 holder.mPhone.setText("No of likes on activities : " + user.getNooffeeds());
+            } else if (mCategory.equalsIgnoreCase("bycommentsmade")) {
+                holder.mPhone.setText("No of comments made : " + user.getNooffeeds());
+                if (!user.getLast_date().equalsIgnoreCase("n/a")) {
+                    holder.mLast_date.setVisibility(View.VISIBLE);
+                    holder.mLast_date.setText("Last commented " + methods.getReadableDate(user.getLast_date(), mContext));
+                }
             }
             if (!user.getProfile().equalsIgnoreCase("N/A")) {
                 RequestOptions requestOptions = new RequestOptions();
@@ -71,14 +81,14 @@ public class feed_monitoring_adapter extends RecyclerView.Adapter<feed_monitorin
                 holder.mProfile.setImageResource(R.drawable.ic_contacts_red);
             }
             holder.mCardView.setOnClickListener(v -> {
-               try{
+                try {
 
-               }catch (Exception e){
-                   Toast.makeText(mContext,"Error raising download event.",Toast.LENGTH_SHORT).show();
-               }
+                } catch (Exception e) {
+                    Toast.makeText(mContext, "Error raising download event.", Toast.LENGTH_SHORT).show();
+                }
             });
-        }catch (Exception e){
-            Toast.makeText(mContext,"Error binding view holder",Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(mContext, "Error binding view holder", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -87,12 +97,13 @@ public class feed_monitoring_adapter extends RecyclerView.Adapter<feed_monitorin
         return mContacts.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView mName;
         public TextView mPhone;
         public CardView mCardView;
         public ImageView mProfile;
+        public TextView mLast_date;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -100,6 +111,7 @@ public class feed_monitoring_adapter extends RecyclerView.Adapter<feed_monitorin
             mPhone = itemView.findViewById(R.id.phone);
             mProfile = itemView.findViewById(R.id.imageView);
             mCardView = itemView.findViewById(R.id.contact_card_view);
+            mLast_date = itemView.findViewById(R.id.last_date);
         }
     }
 }

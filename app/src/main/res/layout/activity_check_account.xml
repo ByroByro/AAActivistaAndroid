@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".CheckAccountActivity">
 
     <LinearLayout
@@ -26,6 +26,8 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColorHint="@color/colorBlack"
+            app:hintTextColor="@color/colorBlack"
             android:layout_marginTop="20dp">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -43,8 +45,9 @@
             android:layout_height="50dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="15dp"
-            android:background="@color/colorRed"
+            android:background="@drawable/custom_button_red"
             android:text="Check"
+            android:padding="6dp"
             android:textAllCaps="false"
             android:layout_gravity="center"
             android:textColor="@color/colorWhite"

@@ -107,7 +107,7 @@ public class ReportCommentActivity extends AppCompatActivity {
                         public void onFailure(Call<ResponseBody> call, Throwable t) {
                             try {
                                 methods.showDialog(mDialog, "dismiss", false);
-                                methods.showAlert("Request failed", "Request failed " + t.toString(), ReportCommentActivity.this);
+                                methods.showRequestFailedDialog(ReportCommentActivity.this);
                             } catch (Exception e) {
                                 Toast.makeText(ReportCommentActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                             }

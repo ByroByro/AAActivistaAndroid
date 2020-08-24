@@ -5,6 +5,11 @@
         <item>F</item>
         <item>Missing</item>
     </array>
+    <array name="mime_types_reg">
+        <item>Picture</item>
+        <item>Scanned Pdf</item>
+        <item>Scanned Doc</item>
+    </array>
     <array name="mime_types">
         <item>Image</item>
         <item>Text</item>

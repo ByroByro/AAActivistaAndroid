@@ -55,6 +55,7 @@ import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.material.snackbar.Snackbar;
 import com.hsalf.smilerating.SmileRating;
 
 import java.util.ArrayList;
@@ -75,6 +76,7 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private List<feed> filtered_Feeds;
     private Context mContext;
     private int mTotalTypes;
+    private LinearLayout rootLayout;
     public boolean isOnline;
     //retrofit
     private ApiInterface apiInterface;
@@ -88,13 +90,14 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private SimpleExoPlayer exoVideoPlayer;
     private SimpleExoPlayer exoAudioPlayer;
 
-    public feed_adapter(ArrayList<feed> feeds, Context ctx, boolean isonline) {
+    public feed_adapter(ArrayList<feed> feeds, Context ctx, boolean isonline, LinearLayout linearLayout) {
 
         this.mFeeds = feeds;
         this.mContext = ctx;
         this.mTotalTypes = mFeeds.size();
         this.filtered_Feeds = new ArrayList<>(feeds);
         this.mDialog = new Dialog(ctx);
+        this.rootLayout = linearLayout;
         this.apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
         this.isOnline = isonline;
     }
@@ -174,11 +177,11 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                             if (!feedInstance.getUploaderProfile().equalsIgnoreCase("N/A")) {
 
                                 Glide.with(mContext)
-                                        .applyDefaultRequestOptions(methods.requestOptions(R.drawable.ic_contacts_red))
+                                        .applyDefaultRequestOptions(methods.requestOptions(R.drawable.ic_account_circle))
                                         .load(feedInstance.getUploaderProfile())
                                         .into(textTypeViewHolder.uploaderProfile);
                             } else {
-                                textTypeViewHolder.uploaderProfile.setImageResource(R.drawable.ic_contacts_red);
+                                textTypeViewHolder.uploaderProfile.setImageResource(R.drawable.ic_account_circle);
                             }
                         } else {
                             //hide some controls
@@ -306,8 +309,8 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
                                             mDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                                             mDialog.show();
-                                        }catch (Exception e){
-                                            Toast.makeText(mContext,"Error showing dialog.",Toast.LENGTH_SHORT).show();
+                                        } catch (Exception e) {
+                                            Toast.makeText(mContext, "Error showing dialog.", Toast.LENGTH_SHORT).show();
                                         }
                                     } else {
                                         //account needed
@@ -364,11 +367,11 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                             if (!feedInstance.getUploaderProfile().equalsIgnoreCase("N/A")) {
 
                                 Glide.with(mContext)
-                                        .applyDefaultRequestOptions(methods.requestOptions(R.drawable.ic_contacts_red))
+                                        .applyDefaultRequestOptions(methods.requestOptions(R.drawable.ic_account_circle))
                                         .load(feedInstance.getUploaderProfile())
                                         .into(imageTypeViewHolder.uploaderProfile);
                             } else {
-                                imageTypeViewHolder.uploaderProfile.setImageResource(R.drawable.ic_contacts_red);
+                                imageTypeViewHolder.uploaderProfile.setImageResource(R.drawable.ic_account_circle);
                             }
                         } else {
                             //hide some controls
@@ -498,7 +501,7 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
                                             mDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                                             mDialog.show();
-                                        }catch(Exception e){
+                                        } catch (Exception e) {
                                             Toast.makeText(mContext, "Error showing dialog.", Toast.LENGTH_SHORT).show();
                                         }
                                     } else {
@@ -547,15 +550,23 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                         if (!feedInstance.getmUrl().equalsIgnoreCase("N/A")) {
                             RequestOptions requestOptions = new RequestOptions();
                             requestOptions.centerCrop();
-                            requestOptions.placeholder(R.drawable.ic_contacts_red);
-                            requestOptions.error(R.drawable.ic_contacts_red);
+                            requestOptions.placeholder(R.drawable.ic_camera_grey);
+                            requestOptions.error(R.drawable.ic_camera_grey);
 
                             Glide.with(mContext)
                                     .applyDefaultRequestOptions(requestOptions)
                                     .load(feedInstance.getmUrl())
                                     .into(((ImageTypeViewHolder) holder).mImage);
                         } else {
-                            ((ImageTypeViewHolder) holder).mImage.setImageResource(R.drawable.ic_menu_gallery);
+                            ((ImageTypeViewHolder) holder).mImage.requestLayout();
+                            ((ImageTypeViewHolder) holder).mImage.getLayoutParams().height = 50;
+                            ((ImageTypeViewHolder) holder).mImage.setImageResource(R.drawable.ic_camera_grey);
+                        }
+
+                        if (!isOnline) {
+                            ((ImageTypeViewHolder) holder).mImage.requestLayout();
+                            ((ImageTypeViewHolder) holder).mImage.getLayoutParams().height = 50;
+                            ((ImageTypeViewHolder) holder).mImage.setImageResource(R.drawable.ic_camera_grey);
                         }
 
                         break;
@@ -570,11 +581,11 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                             if (!feedInstance.getUploaderProfile().equalsIgnoreCase("N/A")) {
 
                                 Glide.with(mContext)
-                                        .applyDefaultRequestOptions(methods.requestOptions(R.drawable.ic_contacts_red))
+                                        .applyDefaultRequestOptions(methods.requestOptions(R.drawable.ic_account_circle))
                                         .load(feedInstance.getUploaderProfile())
                                         .into(videoTypeViewHolder.uploaderProfile);
                             } else {
-                                videoTypeViewHolder.uploaderProfile.setImageResource(R.drawable.ic_contacts_red);
+                                videoTypeViewHolder.uploaderProfile.setImageResource(R.drawable.ic_account_circle);
                             }
                         } else {
                             //hide some controls
@@ -704,7 +715,7 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
                                             mDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                                             mDialog.show();
-                                        }catch (Exception e){
+                                        } catch (Exception e) {
                                             Toast.makeText(mContext, "Error showing dialog.", Toast.LENGTH_SHORT).show();
                                         }
                                     } else {
@@ -781,11 +792,11 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                             if (!feedInstance.getUploaderProfile().equalsIgnoreCase("N/A")) {
 
                                 Glide.with(mContext)
-                                        .applyDefaultRequestOptions(methods.requestOptions(R.drawable.ic_contacts_red))
+                                        .applyDefaultRequestOptions(methods.requestOptions(R.drawable.ic_account_circle))
                                         .load(feedInstance.getUploaderProfile())
                                         .into(videoTypeViewHolder2.uploaderProfile);
                             } else {
-                                videoTypeViewHolder2.uploaderProfile.setImageResource(R.drawable.ic_contacts_red);
+                                videoTypeViewHolder2.uploaderProfile.setImageResource(R.drawable.ic_account_circle);
                             }
                         } else {
                             //hide some controls
@@ -914,7 +925,7 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
                                             mDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                                             mDialog.show();
-                                        }catch (Exception e){
+                                        } catch (Exception e) {
                                             Toast.makeText(mContext, "Error showing dialog.", Toast.LENGTH_SHORT).show();
                                         }
                                     } else {
@@ -1165,17 +1176,18 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                         if (message.equalsIgnoreCase("Failed")) {
                             methods.showAlert("Response", "Failed.Try again.", mContext);
                         } else if (message.equalsIgnoreCase("Success")) {
-                            methods.showAlert("Response", "Liking successful.", mContext);
+                            Toast.makeText(mContext, "Success", Toast.LENGTH_SHORT).show();
                             feed feed = mFeeds.get(position);
                             String num = String.valueOf(Integer.parseInt(feed.getNoOfLikes()) + 1);
                             feed.setNoOfLikes(num);
                             notifyItemChanged(position);
                         } else if (message.equalsIgnoreCase("Error")) {
-                            methods.showAlert("Response", "Server error.", mContext);
+                            Toast.makeText(mContext, "Server error.", Toast.LENGTH_SHORT).show();
                         } else if (message.equalsIgnoreCase("Exist")) {
-                            methods.showAlert("Response", "You liked the same content before.", mContext);
+                            Toast.makeText(mContext, "Exist.", Toast.LENGTH_SHORT).show(); //Snackbar.make(rootLayout, "You liked the same content before.", Snackbar.LENGTH_SHORT).show();
+                        } else if (message.equalsIgnoreCase("Inactive Account")) {
+                            methods.showAlert("Inactive Account", "Your account is currently deactivated.Contact your admin(s).", mContext);
                         }
-                        //Toast.makeText(RegistrationActivity.this, result, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
                         Toast.makeText(mContext, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }
@@ -1219,16 +1231,18 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                         String message = methods.removeQoutes(result);
 
                         if (message.equalsIgnoreCase("Failed")) {
-                            methods.showAlert("Response", "Upload failed.Try again.", mContext);
+                            Toast.makeText(mContext, "Upload failed.Try again.", Toast.LENGTH_SHORT).show();
+                            //Snackbar.make(rootLayout, "Upload failed.Try again.", Snackbar.LENGTH_SHORT).show();
                         } else if (message.equalsIgnoreCase("Success")) {
-                            methods.showAlert("Response", "Commenting successful.", mContext);
-
+                            Toast.makeText(mContext, "Success.", Toast.LENGTH_SHORT).show();
+                            //Snackbar.make(rootLayout, "Success.", Snackbar.LENGTH_SHORT).show();
                         } else if (message.equalsIgnoreCase("Error")) {
-                            methods.showAlert("Response", "Server error.", mContext);
-                        } else if (message.equalsIgnoreCase("Exist")) {
-                            methods.showAlert("Response", "You commented the same content before.", mContext);
+                            Toast.makeText(mContext, "Server error.", Toast.LENGTH_SHORT).show();
+                            //Snackbar.make(rootLayout, "Server error.", Snackbar.LENGTH_SHORT).show();
+                        } else if (message.equalsIgnoreCase("Inactive Account")) {
+                            methods.showAlert("Inactive Account", "Your account is currently deactivated.Contact your admin(s).", mContext);
                         }
-                        //Toast.makeText(RegistrationActivity.this, result, Toast.LENGTH_LONG).show();
+
                     } catch (Exception e) {
                         Toast.makeText(mContext, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }
@@ -1330,13 +1344,16 @@ public class feed_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                         String message = methods.removeQoutes(result);
 
                         if (message.equalsIgnoreCase("Error")) {
-                            //methods.showAlert("Response", "Upload failed.Try again.", mContext);
+                            Toast.makeText(mContext, "Failed.Try again.", Toast.LENGTH_SHORT).show();
                         } else if (message.equalsIgnoreCase("Success")) {
-                            //methods.showAlert("Response", "Liking successful.", mContext);
                             feed feed = mFeeds.get(position);
                             String num = String.valueOf(Integer.parseInt(feed.getNoOfLikes()) - 1);
                             feed.setNoOfLikes(num);
                             notifyItemChanged(position);
+                        } else if (message.equalsIgnoreCase("Inactive Account")) {
+                            methods.showAlert("Inactive Account", "Your account is currently deactivated.Contact your admin(s).", mContext);
+                        } else if(message.equalsIgnoreCase("Like not found")){
+                            Toast.makeText(mContext, "You haven't liked this before.", Toast.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
                         Toast.makeText(mContext, "Error " + e.toString(), Toast.LENGTH_LONG).show();

@@ -166,7 +166,7 @@ public class UpdateDOBBiographyActivity extends AppCompatActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     try {
                         methods.showDialog(mDialog, "Updating...", false);
-                        methods.showAlert("Request failed", "Request failed " + t.toString(), UpdateDOBBiographyActivity.this);
+                        methods.showRequestFailedDialog(UpdateDOBBiographyActivity.this);
                     } catch (Exception e) {
                         Toast.makeText(UpdateDOBBiographyActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }

@@ -1,22 +1,35 @@
 package com.example.actionaidactivista;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.OpenableColumns;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.actionaidactivista.database.prov_dis_helper;
+import com.example.actionaidactivista.navigation.MainBottomNavActivity;
 import com.example.actionaidactivista.retrofit.ApiClient;
 import com.example.actionaidactivista.retrofit.ApiInterface;
 import com.google.android.material.textfield.TextInputEditText;
@@ -25,9 +38,14 @@ import com.google.gson.JsonParser;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -38,6 +56,7 @@ import retrofit2.Response;
 public class RegistrationActivity extends AppCompatActivity {
 
     private Button mDob;//date of birth button
+    private Button mJoiningDate;//joining date
     private Button mRegister;//register button
     Calendar calendar;//calender
     int year, month, day;
@@ -55,6 +74,13 @@ public class RegistrationActivity extends AppCompatActivity {
     private CheckBox mDobStatus;//determining whether dob will appear as age or as is
     private TextInputEditText mEmail;//email field
     private TextInputEditText mBiography;//biography field
+    private Spinner mMimeType;//national id file type {image , doc }
+    private String mDocType;//doc type string
+    private Uri mFilepathUri;//file uri
+    private File file;//file
+    private ImageButton mAttachId;//attach nat id
+    //code for file system request
+    final int FILE_SYSTEM = 100;
     private com.example.actionaidactivista.database.prov_dis_helper prov_dis_helper;
     //retrofit
     private ApiInterface apiInterface;
@@ -82,6 +108,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
             //initialise widgets
             mDob = (Button) findViewById(R.id.dob);
+            mJoiningDate = (Button) findViewById(R.id.joining_date);
             mRegister = (Button) findViewById(R.id.register);
             calendar = Calendar.getInstance();
             mName = (TextInputEditText) findViewById(R.id.first_name);
@@ -96,6 +123,8 @@ public class RegistrationActivity extends AppCompatActivity {
             mBiography = (TextInputEditText) findViewById(R.id.biography);
             mProgress = new ProgressDialog(this);
             mDialog = new Dialog(this);
+            mMimeType = (Spinner) findViewById(R.id.file_type);
+            mAttachId = (ImageButton) findViewById(R.id.attach_file);
             apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
             prov_dis_helper = new prov_dis_helper(this, "", null);
 
@@ -185,11 +214,16 @@ public class RegistrationActivity extends AppCompatActivity {
                     String phone = phoneNumber.getText().toString().trim();//phone number
                     String mail = mEmail.getText().toString().trim();//email
                     String bio = mBiography.getText().toString().trim();//biography
+                    //String joining_date = mJoiningDate.getText().toString().trim();//joining date
 
                     if (dob.equalsIgnoreCase("Pick date of birth")) {
-                        Toast.makeText(RegistrationActivity.this, "Pick date of birth please.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegistrationActivity.this, "Pick date of birth.", Toast.LENGTH_SHORT).show();
                         return;
                     }
+//                    if (joining_date.equalsIgnoreCase("Joining date")) {
+//                        Toast.makeText(RegistrationActivity.this, "Pick joining date.", Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
                     //check age
                     if (methods.checkAge(dob, this)) {
                         //over age
@@ -220,6 +254,20 @@ public class RegistrationActivity extends AppCompatActivity {
                         dobPublic = "False";
                     }
 
+                    //identity doc
+                    //check if its binary upload and uri is not null
+                    if (file == null) {
+                        methods.showAlert("Missing info", "Select a file.", this);
+                        return;
+                    }
+
+                    RequestBody the_file = RequestBody.create(
+                            MediaType.parse(this.getContentResolver().getType(mFilepathUri)),
+                            file
+                    );
+
+                    MultipartBody.Part actual_file = MultipartBody.Part.createFormData("file", file.getName(), the_file);
+
                     RequestBody name = RequestBody.create(MultipartBody.FORM, fname);
                     RequestBody sur = RequestBody.create(MultipartBody.FORM, surname);
                     RequestBody db = RequestBody.create(MultipartBody.FORM, methods.changeDateFormat(dob));
@@ -231,8 +279,10 @@ public class RegistrationActivity extends AppCompatActivity {
                     RequestBody biography = RequestBody.create(MultipartBody.FORM, b);
                     RequestBody email = RequestBody.create(MultipartBody.FORM, mail);
                     RequestBody status = RequestBody.create(MultipartBody.FORM, dobPublic);
+                    //RequestBody join_date = RequestBody.create(MultipartBody.FORM, methods.changeDateFormat(joining_date));
+                    RequestBody doc_type = RequestBody.create(MultipartBody.FORM, mDocType);
 
-                    Call<ResponseBody> registerUser = apiInterface.RegisterUser(name, sur, db, prov, dis, sex, occu, number,email,biography,status);
+                    Call<ResponseBody> registerUser = apiInterface.RegisterUser(name, sur, db, prov, dis, sex, occu, number, email, biography, status,doc_type,actual_file);
                     mProgress.setMessage("Registering...");
                     mProgress.setCanceledOnTouchOutside(false);
                     mProgress.setOnKeyListener((dialog, keyCode, event) -> false);
@@ -266,7 +316,7 @@ public class RegistrationActivity extends AppCompatActivity {
                         public void onFailure(Call<ResponseBody> call, Throwable t) {
                             try {
                                 mProgress.dismiss();
-                                methods.showAlert("Request failed", "Request failed " + t.toString(), RegistrationActivity.this);
+                                methods.showRequestFailedDialog(RegistrationActivity.this);
                             } catch (Exception e) {
                                 Toast.makeText(RegistrationActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                             }
@@ -276,7 +326,74 @@ public class RegistrationActivity extends AppCompatActivity {
                     Toast.makeText(RegistrationActivity.this, "Error raising registration event", Toast.LENGTH_SHORT).show();
                 }
             });
+            //set joining date on click listener
+            mJoiningDate.setOnClickListener(v -> {
+                if (v == mJoiningDate) {
+                    year = calendar.get(Calendar.YEAR);
+                    month = calendar.get(Calendar.MONTH);
+                    day = calendar.get(Calendar.DAY_OF_MONTH);
+                    datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
 
+                        @Override
+                        public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                            String datenow;
+                            if (dayOfMonth > 9 && (month + 1) < 10) {
+                                datenow = dayOfMonth + "-0" + (month + 1) + "-" + year;
+                            } else if (dayOfMonth < 10 && (month + 1) > 9) {
+
+                                datenow = "0" + dayOfMonth + "-" + (month + 1) + "-" + year;
+                            } else if (dayOfMonth < 10 && (month + 1) < 10) {
+
+                                datenow = "0" + dayOfMonth + "-0" + (month + 1) + "-" + year;
+                            } else {
+
+                                datenow = dayOfMonth + "-" + (month + 1) + "-" + year;
+                            }
+                            mJoiningDate.setText(datenow);
+                        }
+                    }, year, month, day);
+                    datePickerDialog.show();
+                }
+            });
+            //attach file event
+            mAttachId.setOnClickListener(v -> {
+                try {
+                    //check for permission to read/write external storage
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                            PackageManager.PERMISSION_GRANTED) {
+                        //intent for picking file
+                        //get file type
+                        //check if media is mounted and if there is enough space when creating app files
+                        File root1 = Environment.getExternalStorageDirectory();
+                        File base_dir = new File(root1.getAbsolutePath() + getString(R.string.base_dir));
+                        if (!base_dir.exists()) {
+                            base_dir.mkdirs();
+                        }
+                        String type = mMimeType.getSelectedItem().toString();
+                        if (type.equalsIgnoreCase("Picture")) {
+                            mDocType = "image";
+                            Intent intent = new Intent(Intent.ACTION_PICK);
+                            intent.setType("image/*");
+                            startActivityForResult(Intent.createChooser(intent, "Select Pic"), FILE_SYSTEM);
+                        } else {
+                            mDocType = "doc";
+                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                            intent.addCategory(Intent.CATEGORY_OPENABLE);
+                            intent.setType("*/*");
+                            String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/pdf"};
+                            intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
+                            startActivityForResult(intent, FILE_SYSTEM);
+                        }
+
+                    } else {
+                        askForPermission();
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(RegistrationActivity.this, "Error raising event.", Toast.LENGTH_SHORT).show();
+                }
+            });
+            //remove focus on edit texts when the activity loads
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         } catch (Exception e) {
             Toast.makeText(this, "Error loading UI", Toast.LENGTH_SHORT).show();
         }
@@ -385,5 +502,110 @@ public class RegistrationActivity extends AppCompatActivity {
         } catch (Exception e) {
             System.out.println(e);
         }
+    }
+
+    private void askForPermission() {
+        //get user permission to read/write file system
+        ActivityCompat.requestPermissions(RegistrationActivity.this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, FILE_SYSTEM);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == FILE_SYSTEM && resultCode == RESULT_OK && data != null) {
+            try {
+                //Uri uri = data.getData();
+                mFilepathUri = data.getData();
+
+                String subdir = this.getString(R.string.temp);
+
+                file = convertUriToFile(mFilepathUri, subdir);
+                String filename = file.toString().substring(file.toString().lastIndexOf("/") + 1);
+                Toast.makeText(this, filename, Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    /*
+     * must perform this operation in thread, in case file os to large UI will hang
+     * method takes URI of picked file and sub folder ,then gets the the file from uri
+     * and writes it into the base dir + subfolder
+     */
+    public File convertUriToFile(Uri uri, String folder) {
+        File realFile = null;
+        InputStream inputStream = null;
+        try {
+            inputStream = getContentResolver().openInputStream(uri);
+            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + getString(R.string.base_dir) + folder);
+            if (file.exists() && file.isDirectory()) {
+                String[] children = file.list();
+                for (int i = 0; i < children.length; i++) {
+                    new File(file, children[i]).delete();
+                }
+            } else {
+                file.mkdirs();
+            }
+
+            File file1 = new File(file + "/" + fileInfor(uri).get(0) + "." + fileInfor(uri).get(1));
+            if (!file1.exists()) {
+                file1.createNewFile();
+            }
+            OutputStream outputStream = new FileOutputStream(file1);
+            byte[] buffer = new byte[4 * 1024];
+            int read;
+
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            outputStream.flush();
+            realFile = file1;
+
+        } catch (Exception e) {
+            System.out.println(e);
+            try {
+                inputStream.close();
+            } catch (Exception ex) {
+                System.out.println(ex);
+            }
+        }
+
+        return realFile;
+    }
+
+    /*
+     * gets uri and extracts the file name and extension then returns the info
+     * in an List with name at 0 and ext at 1
+     */
+    public ArrayList<String> fileInfor(Uri uri) {
+        Uri returnUri = uri;
+        ArrayList<String> fileinfor = new ArrayList<>();
+        Cursor returnCursor = getContentResolver().query(returnUri, null, null, null, null);
+        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+        returnCursor.moveToFirst();
+        String mimeType = getContentResolver().getType(returnUri);
+        String name = returnCursor.getString(nameIndex);
+
+        int dot = name.lastIndexOf(".");
+        String extension = name.substring(dot + 1);
+        String real_name = name.substring(0, dot);
+        fileinfor.add(real_name);
+        fileinfor.add(extension);
+
+        return fileinfor;
+    }
+
+    //override on back pressed
+
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+        //go to main bottom nav activity
+        Intent intent = new Intent(this, MainBottomNavActivity.class);
+        startActivity(intent);
     }
 }

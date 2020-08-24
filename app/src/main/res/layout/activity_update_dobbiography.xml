@@ -34,7 +34,7 @@
                     android:background="@color/colorWhite"
                     android:text="Pick date of birth"
                     android:textAllCaps="false"
-                    android:textColor="@color/grey"
+                    android:textColor="@color/colorBlack"
                     android:textSize="20dp" />
 
             </LinearLayout>
@@ -57,6 +57,8 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColorHint="@color/colorBlack"
+                    app:hintTextColor="@color/colorBlack"
                     android:layout_marginTop="10dp">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -81,9 +83,10 @@
             android:layout_gravity="center"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="15dp"
-            android:background="@color/colorRed"
+            android:background="@drawable/custom_button_red"
             android:text="Update"
             android:textAllCaps="false"
+            android:padding="6dp"
             android:textColor="@color/colorWhite"
             android:textSize="20dp" />
     </LinearLayout>

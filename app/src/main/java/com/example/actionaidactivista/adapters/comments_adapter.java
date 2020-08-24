@@ -125,15 +125,15 @@ public class comments_adapter extends RecyclerView.Adapter<comments_adapter.View
             if (!comm.getProfilePic().equalsIgnoreCase("N/A")) {
                 RequestOptions requestOptions = new RequestOptions();
                 requestOptions.centerCrop();
-                requestOptions.placeholder(R.drawable.ic_contacts_red);
-                requestOptions.error(R.drawable.ic_contacts_red);
+                requestOptions.placeholder(R.drawable.ic_account_circle);
+                requestOptions.error(R.drawable.ic_account_circle);
 
                 Glide.with(mContext)
                         .applyDefaultRequestOptions(requestOptions)
                         .load(comm.getProfilePic())
                         .into(holder.profile);
             } else {
-                holder.profile.setImageResource(R.drawable.ic_contacts_red);
+                holder.profile.setImageResource(R.drawable.ic_account_circle);
             }
 
             //set delete button to visible if comment commenter id is

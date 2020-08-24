@@ -4,7 +4,7 @@
     <item
         android:id="@+id/action_by_feeds_uploaded"
         android:orderInCategory="100"
-        android:title="By no of activities initiated"
+        android:title="By no of activities initiated(Posts)"
         app:showAsAction="never" />
 
     <item
@@ -17,5 +17,11 @@
         android:id="@+id/action_by_feeds_liking"
         android:orderInCategory="100"
         android:title="By no of likes on feeds"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_by_most_comments"
+        android:orderInCategory="100"
+        android:title="By most comments made"
         app:showAsAction="never" />
 </menu>

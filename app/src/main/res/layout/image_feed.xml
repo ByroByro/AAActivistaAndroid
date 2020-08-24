@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/image_type_card_view"
     android:layout_width="match_parent"
@@ -18,7 +19,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+            <de.hdodenhof.circleimageview.CircleImageView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/imageView"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
@@ -26,7 +28,7 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_contacts_red"
+                android:src="@drawable/ic_account_circle"
                 app:civ_border_color="@color/colorWhite"
                 app:civ_border_width="2dp" />
 
@@ -39,7 +41,7 @@
                 android:layout_toRightOf="@+id/imageView"
                 android:padding="5dp"
                 android:text="username"
-                android:textColor="@color/green"
+                android:textColor="@color/colorBlack"
                 android:textSize="15dp" />
 
         </RelativeLayout>
@@ -50,7 +52,7 @@
             android:layout_height="250dp"
             android:layout_marginTop="10dp"
             android:scaleType="fitXY"
-            android:src="@drawable/ic_menu_camera"
+            android:src="@drawable/ic_camera_grey"
             android:visibility="visible" />
 
         <androidx.cardview.widget.CardView
@@ -76,8 +78,7 @@
                     android:id="@+id/feed_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text=""
-                    android:textColor="@color/colorRed" />
+                    android:text="" />
 
                 <RelativeLayout
                     android:id="@+id/relative_Layout"
@@ -90,7 +91,7 @@
                         android:layout_height="wrap_content"
                         android:padding="5dp"
                         android:text="0 like(s)"
-                        android:textColor="@color/green"
+                        android:textColor="@color/colorBlack"
                         android:textSize="15dp" />
 
                     <TextView
@@ -113,7 +114,7 @@
                         android:layout_toRightOf="@+id/no_of_comments"
                         android:padding="5dp"
                         android:text="View Comments"
-                        android:textColor="@color/green"
+                        android:textColor="@color/colorBlack"
                         android:textSize="15dp" />
 
                     <ImageButton
@@ -121,7 +122,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/no_of_likes"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@color/transparent"
                         android:src="@drawable/ic_thumb_up" />
 
                     <ImageButton
@@ -129,7 +133,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/no_of_likes"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@color/transparent"
                         android:layout_toRightOf="@id/like"
                         android:src="@drawable/ic_thumb_down" />
 
@@ -138,7 +145,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/no_of_likes"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@color/transparent"
                         android:layout_toRightOf="@id/unlike"
                         android:src="@drawable/ic_comment" />
 
@@ -147,8 +157,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/no_of_likes"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginTop="15dp"
                         android:layout_toRightOf="@id/comment"
+                        android:layout_marginLeft="10dp"
+                        android:background="@color/transparent"
                         android:src="@drawable/ic_delete"
                         android:visibility="gone" />
 

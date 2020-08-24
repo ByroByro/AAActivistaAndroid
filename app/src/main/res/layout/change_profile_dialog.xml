@@ -31,7 +31,7 @@
                     android:id="@+id/fullImage"
                     android:layout_width="match_parent"
                     android:layout_height="400dp"
-                    android:scaleType="centerCrop"
+                    android:scaleType="fitXY"
                     android:src="@drawable/ic_account_circle" />
 
                 <RelativeLayout
@@ -46,9 +46,10 @@
                         android:layout_alignParentLeft="true"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="15dp"
-                        android:background="@color/colorRed"
+                        android:background="@drawable/custom_button_red"
                         android:text="Cancel"
                         android:textAllCaps="false"
+                        android:padding="6dp"
                         android:textColor="@color/colorWhite"
                         android:textSize="20dp" />
 
@@ -59,10 +60,11 @@
                         android:layout_alignParentRight="true"
                         android:layout_marginTop="10dp"
                         android:layout_marginBottom="15dp"
-                        android:background="@color/colorRed"
-                        android:text="Ok"
-                        android:textAllCaps="false"
+                        android:background="@drawable/custom_button_red"
+                        android:text="Update"
                         android:textColor="@color/colorWhite"
+                        android:textAllCaps="false"
+                        android:padding="6dp"
                         android:textSize="20dp" />
 
                 </RelativeLayout>

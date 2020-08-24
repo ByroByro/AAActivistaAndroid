@@ -55,13 +55,11 @@ public class MainBottomNavActivity extends AppCompatActivity {
     private FeedFragment feedFragment;
     private ActivityUploadActivity activityUploadActivity;
     private OpportunitiesFragment opportunitiesFragment;
-    private LibraryFragment libraryFragment;
     private ContactFragment contactFragment;
     private UploadOpportunityFragment uploadOpportunityFragment;
     private ActivistaApprovalFragment activistaApprovalFragment;
     private AlumniFragment alumniFragment;
     SharedPreferences sharedPreferences;
-    private ContentModerationFragment contentModerationFragment;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -120,6 +118,7 @@ public class MainBottomNavActivity extends AppCompatActivity {
                     return true;
                 case R.id.action_register:
                     Intent reg = new Intent(MainBottomNavActivity.this, RegistrationActivity.class);
+                    reg.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(reg);
                     return true;
             }
@@ -141,11 +140,9 @@ public class MainBottomNavActivity extends AppCompatActivity {
             feedFragment = new FeedFragment();
             activityUploadActivity = new ActivityUploadActivity();
             opportunitiesFragment = new OpportunitiesFragment();
-            libraryFragment = new LibraryFragment();
             contactFragment = new ContactFragment();
             uploadOpportunityFragment = new UploadOpportunityFragment();
             activistaApprovalFragment = new ActivistaApprovalFragment();
-            contentModerationFragment = new ContentModerationFragment();
             alumniFragment = new AlumniFragment();
             setFragment(feedFragment);
         } catch (Exception e) {
@@ -237,7 +234,8 @@ public class MainBottomNavActivity extends AppCompatActivity {
                 setFragment(activistaApprovalFragment);
                 break;
             case R.id.action_moderate_content:
-                setFragment(contentModerationFragment);
+                Intent cont_mode = new Intent(MainBottomNavActivity.this, ContentModerationFragment.class);
+                startActivity(cont_mode);
                 break;
             case R.id.action_subscriber_monitor:
                 Intent intent1 = new Intent(MainBottomNavActivity.this, FeedsMonitoringActivity.class);
@@ -248,7 +246,8 @@ public class MainBottomNavActivity extends AppCompatActivity {
                 startActivity(opp_apps);
                 break;
             case R.id.action_library:
-                setFragment(libraryFragment);
+                Intent library = new Intent(MainBottomNavActivity.this, LibraryFragment.class);
+                startActivity(library);
                 break;
             case R.id.action_alumni_members:
                 setFragment(alumniFragment);

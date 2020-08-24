@@ -19,6 +19,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.actionaidactivista.R;
 import com.example.actionaidactivista.methods;
 import com.example.actionaidactivista.models.contact;
+import com.example.actionaidactivista.models.feed;
 import com.example.actionaidactivista.models.library_article;
 
 import java.util.ArrayList;
@@ -90,20 +91,20 @@ public class contact_adapter extends RecyclerView.Adapter<contact_adapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         try {
             contact contact = mContacts.get(position);
-            holder.mName.setText("Name : " + contact.getmName() + " " + contact.getmSurname());
-            holder.mPhone.setText("Occupation : " + contact.getmOccupation());
+            holder.mName.setText(contact.getmName() + " " + contact.getmSurname());
+            holder.mPhone.setText(contact.getmOccupation());
             if (!contact.getmProfileUrl().equalsIgnoreCase("N/A")) {
                 RequestOptions requestOptions = new RequestOptions();
                 requestOptions.centerCrop();
-                requestOptions.placeholder(R.drawable.ic_contacts_red);
-                requestOptions.error(R.drawable.ic_contacts_red);
+                requestOptions.placeholder(R.drawable.ic_account_circle);
+                requestOptions.error(R.drawable.ic_account_circle);
 
                 Glide.with(mContext)
                         .applyDefaultRequestOptions(requestOptions)
                         .load(contact.getmProfileUrl())
                         .into(holder.mProfile);
             } else {
-                holder.mProfile.setImageResource(R.drawable.ic_contacts_red);
+                holder.mProfile.setImageResource(R.drawable.ic_account_circle);
             }
             holder.mCardView.setOnClickListener(v -> {
                 try {
@@ -113,6 +114,7 @@ public class contact_adapter extends RecyclerView.Adapter<contact_adapter.ViewHo
                     stringBuffer.append("\nGender : " + contact.getmGender());
                     if (contact.getmDobPublic().equalsIgnoreCase("True")) {
                         stringBuffer.append("\nDate of Birth : " + methods.getReadableDate(contact.getmDob(), mContext));
+                        stringBuffer.append("\nAge : " + methods.getAge(contact.getmDob(),mContext));
                     } else {
                        stringBuffer.append("\nAge : " + methods.getAge(contact.getmDob(),mContext));
                     }
@@ -120,7 +122,7 @@ public class contact_adapter extends RecyclerView.Adapter<contact_adapter.ViewHo
                     stringBuffer.append("\nPhone No : " + contact.getmPhone());
                     //stringBuffer.append("\nApproval status(IsApproved) : " + contact.getmStatus());
                     stringBuffer.append("\nBiography : " + contact.getmBio());
-                    methods.showAlert("\nActivista Details", stringBuffer.toString(), mContext);
+                    methods.showAlert("\nMember Details", stringBuffer.toString(), mContext);
                 } catch (Exception e) {
                     Toast.makeText(mContext, "Error raising download event.", Toast.LENGTH_SHORT).show();
                 }
@@ -148,6 +150,18 @@ public class contact_adapter extends RecyclerView.Adapter<contact_adapter.ViewHo
             mPhone = itemView.findViewById(R.id.phone);
             mProfile = itemView.findViewById(R.id.imageView);
             mCardView = itemView.findViewById(R.id.contact_card_view);
+        }
+    }
+
+    //method for adding more members
+    public void addMember(List<contact> list) {
+        try {
+            for (contact f : list) {
+                mContacts.add(f);
+            }
+            notifyDataSetChanged();
+        } catch (Exception e) {
+            Toast.makeText(mContext, "Add feed error in adapter", Toast.LENGTH_SHORT).show();
         }
     }
 }

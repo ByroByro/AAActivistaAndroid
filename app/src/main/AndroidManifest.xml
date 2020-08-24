@@ -61,11 +61,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RegistrationActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".navigation.MainBottomNavActivity" />
-        </activity>
+
+        <activity android:name=".RegistrationActivity"/>
+        <activity android:name=".ContentModerationFragment"/>
+        <activity android:name=".LibraryFragment"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"

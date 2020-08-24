@@ -15,6 +15,8 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColorHint="@color/colorBlack"
+            app:hintTextColor="@color/colorBlack"
             android:layout_marginTop="20dp">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -30,6 +32,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:textColorHint="@color/colorBlack"
+            app:hintTextColor="@color/colorBlack"
             app:passwordToggleDrawable="@drawable/icon_selector"
             app:passwordToggleEnabled="true">
 
@@ -56,10 +60,10 @@
                 android:layout_marginRight="5dp"
                 android:layout_marginBottom="15dp"
                 android:layout_weight="1"
-                android:background="@color/colorRed"
+                android:background="@drawable/custom_button_red"
                 android:text="Sign Up"
-                android:textAllCaps="false"
                 android:textColor="@color/colorWhite"
+                android:textAllCaps="false"
                 android:textSize="20dp" />
 
             <Button
@@ -70,7 +74,7 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="15dp"
                 android:layout_weight="1"
-                android:background="@color/colorRed"
+                android:background="@drawable/custom_button_red"
                 android:text="Login"
                 android:textAllCaps="false"
                 android:textColor="@color/colorWhite"

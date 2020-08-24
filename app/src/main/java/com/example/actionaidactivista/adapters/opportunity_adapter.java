@@ -25,6 +25,7 @@ import com.example.actionaidactivista.ApplyOpportunityActivity;
 import com.example.actionaidactivista.R;
 import com.example.actionaidactivista.RegistrationActivity;
 import com.example.actionaidactivista.methods;
+import com.example.actionaidactivista.models.ReportedComment;
 import com.example.actionaidactivista.models.opportunity;
 import com.example.actionaidactivista.retrofit.ApiClient;
 import com.example.actionaidactivista.retrofit.ApiInterface;
@@ -321,6 +322,18 @@ public class opportunity_adapter extends RecyclerView.Adapter<opportunity_adapte
             });
         } catch (Exception e) {
             Toast.makeText(mContext, "Error " + e.toString(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //method for adding more opportunities
+    public void addOpportunity(List<opportunity> list) {
+        try {
+            for (opportunity c : list) {
+                mOpportunities.add(c);
+            }
+            notifyDataSetChanged();
+        } catch (Exception e) {
+            Toast.makeText(mContext, "Add opportunity error in adapter", Toast.LENGTH_SHORT).show();
         }
     }
 }

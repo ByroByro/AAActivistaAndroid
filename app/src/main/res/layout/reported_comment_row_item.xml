@@ -43,6 +43,8 @@
                 android:layout_marginTop="5dp"
                 android:layout_toRightOf="@+id/view_reason"
                 android:layout_marginBottom="5dp"
+                android:layout_marginRight="15dp"
+                android:background="@color/transparent"
                 android:src="@drawable/ic_delete"
                 android:visibility="visible" />
 

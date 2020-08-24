@@ -251,15 +251,17 @@ public class content_mod_feed_adapter extends RecyclerView.Adapter<RecyclerView.
                         if (!feedInstance.getmUrl().equalsIgnoreCase("N/A")) {
                             RequestOptions requestOptions = new RequestOptions();
                             requestOptions.centerCrop();
-                            requestOptions.placeholder(R.drawable.ic_contacts_red);
-                            requestOptions.error(R.drawable.ic_contacts_red);
+                            requestOptions.placeholder(R.drawable.ic_camera_grey);
+                            requestOptions.error(R.drawable.ic_camera_grey);
 
                             Glide.with(mContext)
                                     .applyDefaultRequestOptions(requestOptions)
                                     .load(feedInstance.getmUrl())
                                     .into(((ImageTypeViewHolder) holder).mImage);
                         } else {
-                            ((ImageTypeViewHolder) holder).mImage.setImageResource(R.drawable.ic_menu_gallery);
+                            ((feed_adapter.ImageTypeViewHolder) holder).mImage.requestLayout();
+                            ((feed_adapter.ImageTypeViewHolder) holder).mImage.getLayoutParams().height = 50;
+                            ((ImageTypeViewHolder) holder).mImage.setImageResource(R.drawable.ic_camera_grey);
                         }
                         //set card view on click listener
                         imageTypeViewHolder.mMore.setOnClickListener(v -> {
@@ -353,6 +355,7 @@ public class content_mod_feed_adapter extends RecyclerView.Adapter<RecyclerView.
                             }
                         });
                         break;
+
                     case VIDEO_TYPE:
                         VideoTypeViewHolder videoTypeViewHolder = (VideoTypeViewHolder) holder;
                         videoTypeViewHolder.mDescription.setText(feedInstance.getmDescription());
@@ -776,6 +779,18 @@ public class content_mod_feed_adapter extends RecyclerView.Adapter<RecyclerView.
             }
         }catch (Exception e){
             Toast.makeText(mContext,"Error : could not release player.",Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //method for adding more feeds
+    public void addFeed(List<feed> list) {
+        try {
+            for (feed f : list) {
+                mFeeds.add(f);
+            }
+            notifyDataSetChanged();
+        } catch (Exception e) {
+            Toast.makeText(mContext, "Add feed error in adapter", Toast.LENGTH_SHORT).show();
         }
     }
 }

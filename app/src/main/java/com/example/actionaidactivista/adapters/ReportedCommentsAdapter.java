@@ -76,7 +76,7 @@ public class ReportedCommentsAdapter extends RecyclerView.Adapter<ReportedCommen
             holder.reason.setPaintFlags(holder.reason.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             holder.delete.setOnClickListener(v -> {
                 try {
-                    deleteComment(comm.getId(), position);
+                    deleteComment(comm.getCommentid(), position);
                 } catch (Exception e) {
                     Toast.makeText(mContext, "Error raising delete event", Toast.LENGTH_SHORT).show();
                 }
@@ -122,7 +122,7 @@ public class ReportedCommentsAdapter extends RecyclerView.Adapter<ReportedCommen
             }
             notifyDataSetChanged();
         } catch (Exception e) {
-            Toast.makeText(mContext, "Add feed error in adapter", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "Add comment error in adapter", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -141,7 +141,7 @@ public class ReportedCommentsAdapter extends RecyclerView.Adapter<ReportedCommen
                             String responseData = response.body().string();
                             String result = methods.removeQoutes(responseData);
                             if (result.equalsIgnoreCase("Success")) {
-                                //notifyItemRemoved(position);
+                                notifyItemRemoved(position);
                                 Toast.makeText(mContext, "Comment deleted.", Toast.LENGTH_SHORT).show();
                             } else if (result.equalsIgnoreCase("Error")) {
                                 Toast.makeText(mContext, "Server error.", Toast.LENGTH_SHORT).show();

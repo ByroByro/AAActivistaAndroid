@@ -84,7 +84,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_marginTop="10dp"
                             android:layout_marginBottom="15dp"
-                            android:background="@color/colorRed"
+                            android:background="@drawable/custom_button_red"
                             android:text="Remove"
                             android:textAllCaps="false"
                             android:textColor="@color/colorWhite"
@@ -99,7 +99,7 @@
                             android:layout_marginRight="5dp"
                             android:layout_marginBottom="15dp"
                             android:layout_toRightOf="@+id/remove_pic"
-                            android:background="@color/colorRed"
+                            android:background="@drawable/custom_button_red"
                             android:text="Gallery"
                             android:textAllCaps="false"
                             android:textColor="@color/colorWhite"
@@ -112,7 +112,7 @@
                             android:layout_marginTop="10dp"
                             android:layout_marginBottom="15dp"
                             android:layout_toRightOf="@+id/gallery"
-                            android:background="@color/colorRed"
+                            android:background="@drawable/custom_button_red"
                             android:text="Camera"
                             android:textAllCaps="false"
                             android:textColor="@color/colorWhite"
@@ -140,6 +140,8 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:textColorHint="@color/colorBlack"
+                        app:hintTextColor="@color/colorBlack"
                         android:layout_marginTop="10dp">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -154,6 +156,8 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:textColorHint="@color/colorBlack"
+                        app:hintTextColor="@color/colorBlack"
                         android:layout_marginTop="10dp">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -182,7 +186,7 @@
                         android:background="@color/colorWhite"
                         android:text="Change date of birth"
                         android:textAllCaps="false"
-                        android:textColor="@color/grey"
+                        android:textColor="@color/colorBlack"
                         android:textSize="20dp" />
 
                     <CheckBox
@@ -227,6 +231,8 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:textColorHint="@color/colorBlack"
+                        app:hintTextColor="@color/colorBlack"
                         android:layout_marginTop="10dp">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -241,6 +247,8 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:textColorHint="@color/colorBlack"
+                        app:hintTextColor="@color/colorBlack"
                         android:layout_marginTop="10dp">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -264,7 +272,9 @@
                             android:gravity="top|left"
                             android:hint="Email"
                             android:inputType="textMultiLine"
-                            android:lines="2" />
+                            android:lines="2"
+                            android:textColorHint="@color/colorBlack"
+                            app:hintTextColor="@color/colorBlack"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -274,10 +284,11 @@
                         android:layout_height="40dp"
                         android:layout_gravity="center"
                         android:layout_marginTop="10dp"
-                        android:background="@color/colorRed"
+                        android:background="@drawable/custom_button_red"
                         android:text="Update"
-                        android:textAllCaps="false"
+                        android:padding="6dp"
                         android:textColor="@color/colorWhite"
+                        android:textAllCaps="false"
                         android:textSize="20dp" />
 
                     <TextView

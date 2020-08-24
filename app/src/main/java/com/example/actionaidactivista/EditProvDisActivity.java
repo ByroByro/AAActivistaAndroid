@@ -125,7 +125,7 @@ public class EditProvDisActivity extends AppCompatActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     try {
                         methods.showDialog(mDialog, "Updating...", false);
-                        methods.showAlert("Request failed", "Request failed " + t.toString(), EditProvDisActivity.this);
+                        methods.showRequestFailedDialog(EditProvDisActivity.this);
                     } catch (Exception e) {
                         Toast.makeText(EditProvDisActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }

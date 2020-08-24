@@ -29,6 +29,7 @@ import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -277,6 +278,10 @@ public class ProfileActivity extends AppCompatActivity {
             }
             //get current details
             getMyDetails();
+
+            //remove focus on edit texts when the activity loads
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
         } catch (Exception e) {
             Toast.makeText(this, "error loading ui", Toast.LENGTH_SHORT).show();
         }
@@ -458,7 +463,7 @@ public class ProfileActivity extends AppCompatActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     try {
                         methods.showDialog(mDialog, "dismiss", false);
-                        methods.showAlert("Request failed", "Request failed " + t.toString(), ProfileActivity.this);
+                        methods.showRequestFailedDialog(ProfileActivity.this);
                     } catch (Exception e) {
                         Toast.makeText(ProfileActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }
@@ -626,7 +631,7 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 methods.showDialog(mDialog, "Dismiss", false);
-                methods.showAlert("Failure", t.toString(), ProfileActivity.this);
+                methods.showRequestFailedDialog(ProfileActivity.this);
             }
         });
     }
@@ -689,7 +694,7 @@ public class ProfileActivity extends AppCompatActivity {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 try {
                     methods.showDialog(mDialog, "Updating...", false);
-                    methods.showAlert("Request failed", "Request failed " + t.toString(), ProfileActivity.this);
+                    methods.showRequestFailedDialog(ProfileActivity.this);
                 } catch (Exception e) {
                     Toast.makeText(ProfileActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                 }
@@ -736,7 +741,7 @@ public class ProfileActivity extends AppCompatActivity {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 try {
                     methods.showDialog(mDialog, "dismiss", false);
-                    methods.showAlert("Request failed", "Request failed " + t.toString(), ProfileActivity.this);
+                    methods.showRequestFailedDialog(ProfileActivity.this);
                 } catch (Exception e) {
                     Toast.makeText(ProfileActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                 }
@@ -816,7 +821,7 @@ public class ProfileActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     methods.showDialog(mDialog, "Dismiss", false);
-                    methods.showAlert("List onFailure", t.toString(), ProfileActivity.this);
+                    methods.showRequestFailedDialog(ProfileActivity.this);
                 }
             });
         } catch (Exception e) {
@@ -865,7 +870,7 @@ public class ProfileActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     methods.showDialog(mDialog, "Dismiss", false);
-                    methods.showAlert("List onFailure", t.toString(), ProfileActivity.this);
+                    methods.showRequestFailedDialog(ProfileActivity.this);
                 }
             });
         } catch (Exception e) {

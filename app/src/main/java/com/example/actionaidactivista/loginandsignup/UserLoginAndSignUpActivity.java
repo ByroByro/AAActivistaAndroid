@@ -103,8 +103,6 @@ public class UserLoginAndSignUpActivity extends AppCompatActivity {
                     try {
                         methods.showDialog(mDialog, "dismiss", false);
                         String result = response.body().string();
-
-                        //String[] tokens = methods.removeQoutes(result).split(":");
                         String message = methods.removeQoutes(result);
 
                         if (message.equalsIgnoreCase("Failed")) {
@@ -116,8 +114,10 @@ public class UserLoginAndSignUpActivity extends AppCompatActivity {
                             mPassword.setText("");
                         } else if (message.equalsIgnoreCase("Error")) {
                             methods.showAlert("Response", "Server error.", UserLoginAndSignUpActivity.this);
+                        } else if(message.equalsIgnoreCase("No Account Number")){
+                            methods.showAlert("Number no found","We could not find the account number you have given.",UserLoginAndSignUpActivity.this);
                         }
-                        //Toast.makeText(RegistrationActivity.this, result, Toast.LENGTH_LONG).show();
+
                     } catch (Exception e) {
                         Toast.makeText(UserLoginAndSignUpActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }
@@ -127,7 +127,7 @@ public class UserLoginAndSignUpActivity extends AppCompatActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     try {
                         methods.showDialog(mDialog,"dismiss",false);
-                        methods.showAlert("Request failed", "Request failed " + t.toString(), UserLoginAndSignUpActivity.this);
+                        methods.showAlert("Request failed", "Request failed.Check your network connection.", UserLoginAndSignUpActivity.this);
                     } catch (Exception e) {
                         Toast.makeText(UserLoginAndSignUpActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }
@@ -179,7 +179,7 @@ public class UserLoginAndSignUpActivity extends AppCompatActivity {
                         } else if (message.equalsIgnoreCase("Error")) {
                             methods.showAlert("Response", "Server error.", UserLoginAndSignUpActivity.this);
                         }
-                        //Toast.makeText(RegistrationActivity.this, result, Toast.LENGTH_LONG).show();
+
                     } catch (Exception e) {
                         Toast.makeText(UserLoginAndSignUpActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }
@@ -189,7 +189,7 @@ public class UserLoginAndSignUpActivity extends AppCompatActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     try {
                         methods.showDialog(mDialog,"dismiss",false);
-                        methods.showAlert("Request failed", "Request failed " + t.toString(), UserLoginAndSignUpActivity.this);
+                        methods.showAlert("Request failed", "Request failed..Check your network connection.", UserLoginAndSignUpActivity.this);
                     } catch (Exception e) {
                         Toast.makeText(UserLoginAndSignUpActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }

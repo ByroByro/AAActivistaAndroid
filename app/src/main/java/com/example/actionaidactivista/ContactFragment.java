@@ -53,6 +53,13 @@ public class ContactFragment extends Fragment {
     //retrofit
     private ApiInterface apiInterface;
 
+    //variables for pagination
+    private boolean isLoading = true;
+    private int pastVisibleItems, visibleItemCount, totalItemCount, previousTotal = 0;
+    private int view_threshold = 0;
+    private int row_num = 30;
+    private int page_num = 1;
+
     public ContactFragment() {
         // Required empty public constructor
     }
@@ -77,6 +84,32 @@ public class ContactFragment extends Fragment {
             mRecyclerView.setItemAnimator(new DefaultItemAnimator());
             mDialog = new Dialog(getContext());
 
+            //set on scroll listener
+            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    visibleItemCount = linearLayoutManager.getChildCount();
+                    totalItemCount = linearLayoutManager.getItemCount();
+                    pastVisibleItems = linearLayoutManager.findFirstVisibleItemPosition();
+
+                    if (dy > 0) {
+                        if (isLoading) {
+                            if (totalItemCount > previousTotal) {
+                                isLoading = false;
+                                previousTotal = totalItemCount;
+                            }
+                        }
+
+                        if (!isLoading && (totalItemCount - visibleItemCount) <= (pastVisibleItems + view_threshold)) {
+                            page_num++;
+                            getActivistasPagination();
+                            isLoading = true;
+                        }
+                    }
+                }
+            });
+
             setHasOptionsMenu(true);
             //get members
             getActivistas();
@@ -87,10 +120,11 @@ public class ContactFragment extends Fragment {
         return root;
     }
 
+    //get members
     private void getActivistas() {
-        RequestBody page = RequestBody.create(MultipartBody.FORM, "1");
-        RequestBody rows = RequestBody.create(MultipartBody.FORM, "5");
-        Call<ResponseBody> members = apiInterface.getActivistas();
+        RequestBody page = RequestBody.create(MultipartBody.FORM, String.valueOf(page_num));
+        RequestBody rows = RequestBody.create(MultipartBody.FORM, String.valueOf(row_num));
+        Call<ResponseBody> members = apiInterface.getActivistas(rows, page);
         methods.showDialog(mDialog, "Loading members...", true);
         members.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -163,7 +197,89 @@ public class ContactFragment extends Fragment {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 methods.showDialog(mDialog, "Dismiss", false);
-                methods.showAlert("Failure", t.toString(), getContext());
+                methods.showRequestFailedDialog(getContext());
+            }
+        });
+    }
+
+    //get members pagination
+    private void getActivistasPagination() {
+        RequestBody page = RequestBody.create(MultipartBody.FORM, String.valueOf(page_num));
+        RequestBody rows = RequestBody.create(MultipartBody.FORM, String.valueOf(row_num));
+        Call<ResponseBody> members = apiInterface.getActivistas(rows, page);
+        methods.showDialog(mDialog, "Loading members...", true);
+        members.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    methods.showDialog(mDialog, "Dismiss", false);
+                    if (response.isSuccessful()) {
+                        String responseData = response.body().string();
+                        JsonParser parser = new JsonParser();
+                        String result = parser.parse(responseData).getAsString();
+                        if (result.length() == 0) {
+                            Toast.makeText(getContext(), "No more members.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        JSONArray array = new JSONArray(result);
+                        if (array.length() == 0) {
+                            Toast.makeText(getContext(), "No more members.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        List<contact> list = new ArrayList<>();
+                        contact contact;
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject jsonObject = array.getJSONObject(i);
+                            contact = new contact();
+                            contact.setmContactID(jsonObject.getString("id"));
+                            contact.setmName(jsonObject.getString("name"));
+                            contact.setmSurname(jsonObject.getString("surname"));
+                            contact.setmDob(jsonObject.getString("dob"));
+                            contact.setmGender(jsonObject.getString("gender"));
+                            contact.setmOccupation(jsonObject.getString("occupation"));
+                            contact.setmProvid(jsonObject.getString("provid"));
+                            contact.setmDisid(jsonObject.getString("disid"));
+                            contact.setmAccountNo(jsonObject.getString("accno"));
+                            contact.setmProfileUrl(jsonObject.getString("profile"));
+                            contact.setmStatus(jsonObject.getString("approved"));
+                            if (jsonObject.getString("email").equalsIgnoreCase("")) {
+                                contact.setmEmail("N/A");
+                            } else {
+                                contact.setmEmail(jsonObject.getString("email"));
+                            }
+                            if (jsonObject.getString("biography").equalsIgnoreCase("")) {
+                                contact.setmBio("N/A");
+                            } else {
+                                contact.setmBio(jsonObject.getString("biography"));
+                            }
+                            if (jsonObject.getString("isdobpublic").equalsIgnoreCase("")) {
+                                contact.setmDobPublic("N/A");
+                            } else {
+                                contact.setmDobPublic(jsonObject.getString("isdobpublic"));
+                            }
+                            if (jsonObject.getString("phone").equalsIgnoreCase("")) {
+                                contact.setmPhone("N/A");
+                            } else {
+                                contact.setmPhone(jsonObject.getString("phone"));
+                            }
+                            list.add(contact);
+                        }
+
+                        mContactAdapter.addMember(list);
+
+                    } else {
+                        Toast.makeText(getContext(), "Request unsuccessful", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    System.out.println(e);
+                    methods.showAlert("Error", e.toString(), getContext());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                methods.showDialog(mDialog, "Dismiss", false);
+                methods.showRequestFailedDialog(getContext());
             }
         });
     }

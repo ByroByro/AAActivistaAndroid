@@ -21,6 +21,7 @@ import com.example.actionaidactivista.ViewApplicationsActivity;
 import com.example.actionaidactivista.methods;
 import com.example.actionaidactivista.models.applications;
 import com.example.actionaidactivista.models.contact;
+import com.example.actionaidactivista.models.library_article;
 import com.example.actionaidactivista.models.opportunityapplications;
 
 import java.util.ArrayList;
@@ -94,7 +95,7 @@ public class opportunity_applications_adapter extends RecyclerView.Adapter<oppor
             opportunityapplications opp = mList.get(position);
             holder.mTitle.setText("Title : " + opp.getTitle());
             holder.mNoApps.setText(opp.getApplications() + " application(s)");
-            holder.mNoApps.setTextColor(mContext.getResources().getColor(R.color.colorAccent));
+            holder.mNoApps.setTextColor(mContext.getResources().getColor(R.color.colorRed));
 
             holder.mCardView.setOnClickListener(v -> {
                 try {
@@ -126,6 +127,19 @@ public class opportunity_applications_adapter extends RecyclerView.Adapter<oppor
             mTitle = itemView.findViewById(R.id.title);
             mNoApps = itemView.findViewById(R.id.no_applications);
             mCardView = itemView.findViewById(R.id.opp_app_card_view);
+        }
+    }
+
+
+    //method for adding more applications
+    public void addApplication(List<opportunityapplications> list) {
+        try {
+            for (opportunityapplications f : list) {
+                mList.add(f);
+            }
+            notifyDataSetChanged();
+        } catch (Exception e) {
+            Toast.makeText(mContext, "Add feed error in adapter", Toast.LENGTH_SHORT).show();
         }
     }
 }

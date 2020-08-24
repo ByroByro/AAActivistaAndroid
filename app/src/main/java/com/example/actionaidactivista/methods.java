@@ -19,7 +19,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class methods extends DownloadProgress {
+public class methods{
 
     public static void showAlert(String title, String Message, Context context) {
         try {
@@ -27,6 +27,20 @@ public class methods extends DownloadProgress {
             builder.setCancelable(true);
             builder.setTitle(title);
             builder.setMessage(Message);
+            builder.setPositiveButton("Ok",
+                    (dialog, which) -> dialog.cancel());
+            builder.show();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public static void showRequestFailedDialog(Context context){
+        try {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setCancelable(true);
+            builder.setTitle("Request Failed");
+            builder.setMessage("Check your internet connection.");
             builder.setPositiveButton("Ok",
                     (dialog, which) -> dialog.cancel());
             builder.show();

@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -47,7 +48,7 @@ import retrofit2.Response;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class LibraryFragment extends Fragment {
+public class LibraryFragment extends AppCompatActivity {
 
     private List<library_article> mList;
     private RecyclerView mRecyclerView;
@@ -57,45 +58,74 @@ public class LibraryFragment extends Fragment {
     //retrofit
     private ApiInterface apiInterface;
 
+    //variables for pagination
+    private boolean isLoading = true;
+    private int pastVisibleItems, visibleItemCount, totalItemCount, previousTotal = 0;
+    private int view_threshold = 0;
+    private int row_num = 30;
+    private int page_num = 1;
+
     public LibraryFragment() {
         // Required empty public constructor
     }
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-        View root = null;
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         try {
             // Inflate the layout for this fragment
-            root = inflater.inflate(R.layout.fragment_library, container, false);
+            setContentView(R.layout.fragment_library);
             //set title
-            ((MainBottomNavActivity) getActivity()).setActionBarTitle("Library");
+            getSupportActionBar().setTitle("Library");
             //initialize widgets
-            mRecyclerView = root.findViewById(R.id.library_list_recycler);
+            mRecyclerView = findViewById(R.id.library_list_recycler);
             mRecyclerView.setHasFixedSize(true);
-            final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+            final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             mRecyclerView.setLayoutManager(linearLayoutManager);
             mRecyclerView.setItemAnimator(new DefaultItemAnimator());
             apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
-            mDialog = new Dialog(getContext());
+            mDialog = new Dialog(this);
 
+            //on scroll listener for recycler view
+            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    visibleItemCount = linearLayoutManager.getChildCount();
+                    totalItemCount = linearLayoutManager.getItemCount();
+                    pastVisibleItems = linearLayoutManager.findFirstVisibleItemPosition();
+
+                    if (dy > 0) {
+                        if (isLoading) {
+                            if (totalItemCount > previousTotal) {
+                                isLoading = false;
+                                previousTotal = totalItemCount;
+                            }
+                        }
+
+                        if (!isLoading && (totalItemCount - visibleItemCount) <= (pastVisibleItems + view_threshold)) {
+                            page_num++;
+                            getArticlesPagination();
+                            isLoading = true;
+                        }
+                    }
+                }
+            });
             //make sure that options menu show
-            setHasOptionsMenu(true);
+            //setHasOptionsMenu(true);
             //get articles
             getArticles();
         } catch (Exception e) {
-            Toast.makeText(getContext(), "Error loading UI", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error loading UI", Toast.LENGTH_SHORT).show();
         }
-        return root;
     }
 
     @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
+        super.onCreateOptionsMenu(menu);
         try {
-            inflater.inflate(R.menu.search_menu, menu);
+            getMenuInflater().inflate(R.menu.search_menu, menu);
             MenuItem item = menu.findItem(R.id.m_search);
             SearchView searchView = (SearchView) item.getActionView();
             searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
@@ -116,20 +146,22 @@ public class LibraryFragment extends Fragment {
         } catch (Exception e) {
             System.out.println(e);
         }
+        return true;
     }
 
     @Override
-    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+    public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
 
         MenuItem item = menu.findItem(R.id.m_refresh);
         item.setVisible(false);
-        super.onPrepareOptionsMenu(menu);
+        return super.onPrepareOptionsMenu(menu);
     }
 
+    //get library material
     private void getArticles() {
-        RequestBody page = RequestBody.create(MultipartBody.FORM, "1");
-        RequestBody rows = RequestBody.create(MultipartBody.FORM, "5");
-        Call<ResponseBody> articles = apiInterface.getLibrary();
+        RequestBody page = RequestBody.create(MultipartBody.FORM, String.valueOf(page_num));
+        RequestBody rows = RequestBody.create(MultipartBody.FORM, String.valueOf(row_num));
+        Call<ResponseBody> articles = apiInterface.getLibrary(rows, page);
         methods.showDialog(mDialog, "Loading articles...", true);
         articles.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -141,7 +173,7 @@ public class LibraryFragment extends Fragment {
                         JsonParser parser = new JsonParser();
                         String result = parser.parse(responseData).getAsString();
                         if (result.length() == 0) {
-                            Toast.makeText(getContext(), "No more articles.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LibraryFragment.this, "No articles.", Toast.LENGTH_SHORT).show();
                             return;
                         }
                         JSONArray array = new JSONArray(result);
@@ -160,21 +192,76 @@ public class LibraryFragment extends Fragment {
                             article.setmIntType(jsonObject.getString("inttype"));
                             mList.add(article);
                         }
-                        mLibraryAdapter = new library_adapter(mList, getContext());
+                        mLibraryAdapter = new library_adapter(mList, LibraryFragment.this);
                         mRecyclerView.setAdapter(mLibraryAdapter);
                     } else {
-                        Toast.makeText(getContext(), "Request unsuccessful", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LibraryFragment.this, "Request unsuccessful", Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
                     System.out.println(e);
-                    methods.showAlert("Error", e.toString(), getContext());
+                    methods.showAlert("Error", e.toString(), LibraryFragment.this);
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 methods.showDialog(mDialog, "Dismiss", false);
-                methods.showAlert("Failure", t.toString(), getContext());
+                methods.showAlert("Failure", "Request failed.Check your internet connection.", LibraryFragment.this);
+            }
+        });
+    }
+
+    //get library material pagination
+    private void getArticlesPagination() {
+        RequestBody page = RequestBody.create(MultipartBody.FORM, String.valueOf(page_num));
+        RequestBody rows = RequestBody.create(MultipartBody.FORM, String.valueOf(row_num));
+        Call<ResponseBody> articles = apiInterface.getLibrary(rows, page);
+        methods.showDialog(mDialog, "Loading more articles...", true);
+        articles.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    methods.showDialog(mDialog, "Dismiss", false);
+                    if (response.isSuccessful()) {
+                        String responseData = response.body().string();
+                        JsonParser parser = new JsonParser();
+                        String result = parser.parse(responseData).getAsString();
+                        if (result.length() == 0) {
+                            Toast.makeText(LibraryFragment.this, "No more articles.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        JSONArray array = new JSONArray(result);
+                        List<library_article> list = new ArrayList<>();
+                        library_article article;
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject jsonObject = array.getJSONObject(i);
+                            article = new library_article();
+                            article.setmArticleID(jsonObject.getString("id"));
+                            article.setmTitle(jsonObject.getString("title"));
+                            article.setmAuthor(jsonObject.getString("author"));
+                            article.setmDate(jsonObject.getString("dateposted"));
+                            article.setmFileType(jsonObject.getString("filetype"));
+                            article.setmPath(jsonObject.getString("path"));
+                            article.setmUrl(jsonObject.getString("url"));
+                            article.setmIntType(jsonObject.getString("inttype"));
+                            mList.add(article);
+                        }
+
+                        //add to list
+                        mLibraryAdapter.addArticle(list);
+                    } else {
+                        Toast.makeText(LibraryFragment.this, "Request unsuccessful", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    System.out.println(e);
+                    methods.showAlert("Error", e.toString(), LibraryFragment.this);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                methods.showDialog(mDialog, "Dismiss", false);
+                methods.showAlert("Failure", "Request failed.Check your network.", LibraryFragment.this);
             }
         });
     }
@@ -183,10 +270,20 @@ public class LibraryFragment extends Fragment {
     public void onDestroy() {
         try {
             mLibraryAdapter.releaseExoPlayer();
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e);
         }
         //Toast.makeText(getContext(),"Library Fragment onDestroy.",Toast.LENGTH_LONG).show();
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        try {
+            mLibraryAdapter.releaseExoPlayer();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        super.onBackPressed();
     }
 }

@@ -3,10 +3,26 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/colorRed</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:fontFamily">@font/helvetica</item>
+        <item name="android:textViewStyle">@style/TextViewStyle</item>
+        <item name="android:editTextStyle">@style/EditTextStyle</item>
+    </style>
+
+    <style name="ButtonsStyle" parent="@android:style/Widget.Button">
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:background">@drawable/custom_button_red</item>
+    </style>
+
+    <style name="TextViewStyle" parent="@android:style/Widget.TextView">
+        <item name="android:textColor">@color/colorBlack</item>
+    </style>
+
+    <style name="EditTextStyle" parent="android:Widget.EditText">
+        <item name="android:textColor">@color/colorBlack</item>
+        <item name="android:textColorHint">@color/colorBlack</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -20,6 +36,6 @@
 
     <style name="BottomNavigationTheme" parent="Theme.AppCompat.Light">
         <item name="colorPrimary">@color/colorRed</item>
-        <item name="android:textColorSecondary">@color/colorSkyBlue</item>
+        <item name="android:textColorSecondary">@color/colorBlack</item>
     </style>
 </resources>

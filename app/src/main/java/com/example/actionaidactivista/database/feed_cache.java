@@ -44,7 +44,7 @@ public class feed_cache extends SQLiteOpenHelper {
         long ins;
         try {
             //delete the current feeds
-            deleteAllRecordsFromTable("Feeds_table");
+            //deleteAllRecordsFromTable("Feeds_table");
             //first check existence
             SQLiteDatabase db = this.getWritableDatabase();
             Cursor res = db.rawQuery("SELECT * FROM '" + FEEDS + "' WHERE FEEDID ='" + feed.getmId() + "'", null);
@@ -97,7 +97,7 @@ public class feed_cache extends SQLiteOpenHelper {
     /*
      * performs deletion of all entries of a given table
      */
-    private void deleteAllRecordsFromTable(String table_name){
+    public void deleteAllRecordsFromTable(String table_name){
         try{
             SQLiteDatabase db = this.getWritableDatabase();
             db.delete(table_name,null,null);

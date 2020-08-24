@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -84,11 +85,11 @@ public class user_accounts_adapter extends RecyclerView.Adapter<user_accounts_ad
             } else {
                 holder.mProfile.setImageResource(R.drawable.ic_contacts_red);
             }
-            holder.mCardView.setOnClickListener(v -> {
+            holder.mMore.setOnClickListener(v -> {
                 try {
 
                     //Creating the instance of PopupMenu
-                    final PopupMenu popup = new PopupMenu(mContext, holder.mCardView, Gravity.CENTER);
+                    final PopupMenu popup = new PopupMenu(mContext, holder.mMore, Gravity.CENTER);
                     //Inflating the Popup using xml file
                     popup.getMenuInflater().inflate(R.menu.activation_menu, popup.getMenu());
 
@@ -206,6 +207,7 @@ public class user_accounts_adapter extends RecyclerView.Adapter<user_accounts_ad
         public CardView mCardView;
         public ImageView mProfile;
         public TextView mStatus;
+        public ImageButton mMore;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -214,6 +216,7 @@ public class user_accounts_adapter extends RecyclerView.Adapter<user_accounts_ad
             mProfile = itemView.findViewById(R.id.imageView);
             mCardView = itemView.findViewById(R.id.contact_card_view);
             mStatus = itemView.findViewById(R.id.status);
+            mMore = itemView.findViewById(R.id.more);
         }
     }
 
@@ -259,6 +262,17 @@ public class user_accounts_adapter extends RecyclerView.Adapter<user_accounts_ad
             });
         } catch (Exception e) {
             Toast.makeText(mContext, "Error processing action event.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //add more users
+    public void addUser(List<contact> list){
+        try{
+            for(contact c : list){
+                mContacts.add(c);
+            }
+        }catch (Exception e){
+            Toast.makeText(mContext, "Error adding more users.", Toast.LENGTH_SHORT).show();
         }
     }
 }

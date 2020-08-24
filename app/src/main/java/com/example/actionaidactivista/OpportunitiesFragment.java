@@ -56,6 +56,13 @@ public class OpportunitiesFragment extends Fragment {
     //retrofit
     private ApiInterface apiInterface;
 
+    //variables for pagination
+    private boolean isLoading = true;
+    private int pastVisibleItems, visibleItemCount, totalItemCount, previousTotal = 0;
+    private int view_threshold = 0;
+    private int row_num = 30;
+    private int page_num = 1;
+
     public OpportunitiesFragment() {
         // Required empty public constructor
     }
@@ -79,13 +86,38 @@ public class OpportunitiesFragment extends Fragment {
             mRecyclerView.setItemAnimator(new DefaultItemAnimator());
             apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
             mDialog = new Dialog(getContext());
+            //on scroll listener
+            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    visibleItemCount = linearLayoutManager.getChildCount();
+                    totalItemCount = linearLayoutManager.getItemCount();
+                    pastVisibleItems = linearLayoutManager.findFirstVisibleItemPosition();
 
+                    if (dy > 0) {
+                        if (isLoading) {
+                            if (totalItemCount > previousTotal) {
+                                isLoading = false;
+                                previousTotal = totalItemCount;
+                            }
+                        }
+
+                        if (!isLoading && (totalItemCount - visibleItemCount) <= (pastVisibleItems + view_threshold)) {
+                            page_num++;
+                            getMoreOpportunities();
+                            isLoading = true;
+                        }
+                    }
+                }
+            });
+            //this makes sure that the options menu shows
             setHasOptionsMenu(true);
             //get opportunities list
             getOpportunities();
 
         } catch (Exception e) {
-            Toast.makeText(getContext(),"Error loading UI",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Error loading UI", Toast.LENGTH_SHORT).show();
         }
         return root;
     }
@@ -93,10 +125,10 @@ public class OpportunitiesFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        try{
-            inflater.inflate(R.menu.search_menu,menu);
+        try {
+            inflater.inflate(R.menu.search_menu, menu);
             MenuItem item = menu.findItem(R.id.m_search);
-            SearchView searchView = (SearchView)item.getActionView();
+            SearchView searchView = (SearchView) item.getActionView();
             searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
@@ -106,21 +138,22 @@ public class OpportunitiesFragment extends Fragment {
 
                 @Override
                 public boolean onQueryTextChange(String newText) {
-                    if(mOpportunityAdapter != null) {
+                    if (mOpportunityAdapter != null) {
                         mOpportunityAdapter.getFilter().filter(newText);
                     }
                     return false;
                 }
             });
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e);
         }
     }
 
+    //get opportunities
     private void getOpportunities() {
-        RequestBody page = RequestBody.create(MultipartBody.FORM, "1");
-        RequestBody rows = RequestBody.create(MultipartBody.FORM, "5");
-        Call<ResponseBody> opps = apiInterface.getOpportunities();
+        RequestBody page = RequestBody.create(MultipartBody.FORM, String.valueOf(page_num));
+        RequestBody rows = RequestBody.create(MultipartBody.FORM, String.valueOf(row_num));
+        Call<ResponseBody> opps = apiInterface.getOpportunities(rows, page);
         methods.showDialog(mDialog, "Loading opportunities...", true);
         opps.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -131,8 +164,8 @@ public class OpportunitiesFragment extends Fragment {
                         String responseData = response.body().string();
                         JsonParser parser = new JsonParser();
                         String result = parser.parse(responseData).getAsString();
-                        if(result.length() == 0){
-                            Toast.makeText(getContext(), "No more opportunities.", Toast.LENGTH_SHORT).show();
+                        if (result.length() == 0) {
+                            Toast.makeText(getContext(), "No opportunities.", Toast.LENGTH_SHORT).show();
                             return;
                         }
                         JSONArray array = new JSONArray(result);
@@ -155,23 +188,79 @@ public class OpportunitiesFragment extends Fragment {
                             mList.add(opportunity);
                         }
 
-                        mOpportunityAdapter = new opportunity_adapter(mList,getContext());
+                        mOpportunityAdapter = new opportunity_adapter(mList, getContext());
                         mRecyclerView.setAdapter(mOpportunityAdapter);
                     } else {
                         Toast.makeText(getContext(), "Request unsuccessful", Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
                     System.out.println(e);
-                    methods.showAlert("Error", e.toString(), getContext());
+                    methods.showAlert("Error", "Request failed.Check your internet connection.", getContext());
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 methods.showDialog(mDialog, "Dismiss", false);
-                methods.showAlert("Failure", t.toString(), getContext());
+                methods.showRequestFailedDialog(getContext());
             }
         });
     }
 
+    //get more opportunities
+    private void getMoreOpportunities() {
+        RequestBody page = RequestBody.create(MultipartBody.FORM, String.valueOf(page_num));
+        RequestBody rows = RequestBody.create(MultipartBody.FORM, String.valueOf(row_num));
+        Call<ResponseBody> opps = apiInterface.getOpportunities(rows, page);
+        methods.showDialog(mDialog, "Loading more opportunities...", true);
+        opps.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    methods.showDialog(mDialog, "Dismiss", false);
+                    if (response.isSuccessful()) {
+                        String responseData = response.body().string();
+                        JsonParser parser = new JsonParser();
+                        String result = parser.parse(responseData).getAsString();
+                        if (result.length() == 0) {
+                            Toast.makeText(getContext(), "No more opportunities.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        JSONArray array = new JSONArray(result);
+                        List<opportunity> list = new ArrayList<>();
+                        opportunity opportunity;
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject jsonObject = array.getJSONObject(i);
+                            opportunity = new opportunity();
+                            opportunity.setmID(jsonObject.getString("id"));
+                            opportunity.setmTitle(jsonObject.getString("title"));
+                            opportunity.setmDescription(jsonObject.getString("des"));
+                            opportunity.setmDateposted(jsonObject.getString("dateposted"));
+                            opportunity.setmClosingdate(jsonObject.getString("closingdate"));
+                            opportunity.setmLocation(jsonObject.getString("location"));
+                            if (jsonObject.getString("docs").equalsIgnoreCase("")) {
+                                opportunity.setmDocsLink("N/A");
+                            } else {
+                                opportunity.setmDocsLink(jsonObject.getString("docs"));
+                            }
+                            list.add(opportunity);
+                        }
+
+                        mOpportunityAdapter.addOpportunity(list);
+                    } else {
+                        Toast.makeText(getContext(), "Request unsuccessful", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    System.out.println(e);
+                    methods.showAlert("Error", "Request failed.Check your internet connection.", getContext());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                methods.showDialog(mDialog, "Dismiss", false);
+                methods.showRequestFailedDialog(getContext());
+            }
+        });
+    }
 }

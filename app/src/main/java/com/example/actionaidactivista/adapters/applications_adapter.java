@@ -273,4 +273,16 @@ public class applications_adapter extends RecyclerView.Adapter<applications_adap
             mCardView = itemView.findViewById(R.id.opp_app_card_view);
         }
     }
+
+    //method for adding more applicants
+    public void addApplicant(List<applications> list) {
+        try {
+            for (applications f : list) {
+                mList.add(f);
+            }
+            notifyDataSetChanged();
+        } catch (Exception e) {
+            Toast.makeText(mContext, "Add application error in adapter", Toast.LENGTH_SHORT).show();
+        }
+    }
 }

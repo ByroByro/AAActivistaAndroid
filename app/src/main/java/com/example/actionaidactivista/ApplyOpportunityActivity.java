@@ -177,58 +177,6 @@ public class ApplyOpportunityActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-//        if (requestCode == FILE_SYSTEM) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//
-//                File root = Environment.getExternalStorageDirectory();
-//                File base_dir = new File(root.getAbsolutePath() + getString(R.string.base_dir));
-//                if (!base_dir.exists()) {
-//                    base_dir.mkdirs();
-//                }
-//                long type = mDocType.getSelectedItemId();
-//                if (type == 0) {
-//                    mDocuType = "cl";
-//                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-//                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-//                    intent.setType("*/*");
-//                    String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/pdf"};
-//                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
-//                    startActivityForResult(intent, FILE_SYSTEM);
-//                } else if (type == 1) {
-//                    mDocuType = "ml";
-//                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-//                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-//                    intent.setType("*/*");
-//                    String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/pdf"};
-//                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
-//                    startActivityForResult(intent, FILE_SYSTEM);
-//                } else if (type == 2) {
-//                    mDocuType = "cv";
-//                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-//                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-//                    intent.setType("*/*");
-//                    String[] mime_types = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword", "application/pdf"};
-//                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mime_types);
-//                    startActivityForResult(intent, FILE_SYSTEM);
-//                } else if (type == 3) {
-//                    mDocuType = "motivid";
-//                    Intent intent = new Intent(Intent.ACTION_PICK);
-//                    intent.setType("video/*");
-//                    startActivityForResult(intent, FILE_SYSTEM);
-//                } else if (type == 4) {
-//                    mDocuType = "motipic";
-//                    Intent intent = new Intent(Intent.ACTION_PICK);
-//                    intent.setType("image/*");
-//                    startActivityForResult(intent, FILE_SYSTEM);
-//                }
-//
-//            } else {
-//                Toast.makeText(this, "You don't have permission to access file system !", Toast.LENGTH_SHORT).show();
-//            }
-//            return;
-//        }
-
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
@@ -354,13 +302,13 @@ public class ApplyOpportunityActivity extends AppCompatActivity {
                             methods.showAlert("Response", "Upload failed.Try again.", ApplyOpportunityActivity.this);
                         } else if (message.equalsIgnoreCase("Success")) {
                             methods.showAlert("Response", "Upload successful.", ApplyOpportunityActivity.this);
-
                         } else if (message.equalsIgnoreCase("Error")) {
                             methods.showAlert("Response", "Server error.", ApplyOpportunityActivity.this);
-                        } else if (message.equalsIgnoreCase("Exist")) {
-                            methods.showAlert("Response", "There is another opportunity with the same details.", ApplyOpportunityActivity.this);
+                        } else if (message.equalsIgnoreCase("Inactive Account")) {
+                            methods.showAlert("Response", "Your account is deactivated.Contact your administrator(s) for help!.", ApplyOpportunityActivity.this);
+                        }else if (message.equalsIgnoreCase("3 months have lapsed")) {
+                            methods.showAlert("Response", "Your account has been deactivated because of 90 days of inactivity.Contact your admin(s).", ApplyOpportunityActivity.this);
                         }
-                        //Toast.makeText(RegistrationActivity.this, result, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
                         Toast.makeText(ApplyOpportunityActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }
@@ -370,7 +318,7 @@ public class ApplyOpportunityActivity extends AppCompatActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     try {
                         methods.showDialog(mDialog, "dismiss", false);
-                        methods.showAlert("Request failed", "Request failed " + t.toString(), ApplyOpportunityActivity.this);
+                        methods.showRequestFailedDialog(ApplyOpportunityActivity.this);
                     } catch (Exception e) {
                         Toast.makeText(ApplyOpportunityActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }

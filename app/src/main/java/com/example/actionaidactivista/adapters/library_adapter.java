@@ -31,6 +31,7 @@ import com.example.actionaidactivista.PreviewOnlineDocActivity;
 import com.example.actionaidactivista.R;;
 import com.example.actionaidactivista.logic.DownloadProgress;
 import com.example.actionaidactivista.methods;
+import com.example.actionaidactivista.models.contact;
 import com.example.actionaidactivista.models.library_article;
 import com.example.actionaidactivista.retrofit.ApiClient;
 import com.example.actionaidactivista.retrofit.ApiInterface;
@@ -96,7 +97,7 @@ public class library_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         this.mHandler = new Handler();
         this.filtered_Articles = new ArrayList<>(list);
         this.progressDialog = new Dialog(mContext);
-        downloadProgress = new DownloadProgress(progressDialog, mContext);
+        this.downloadProgress = new DownloadProgress(progressDialog, mContext);
     }
 
     public Filter getFilter() {
@@ -748,4 +749,15 @@ public class library_adapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
+    //method for adding more members
+    public void addArticle(List<library_article> list) {
+        try {
+            for (library_article f : list) {
+                mArticles.add(f);
+            }
+            notifyDataSetChanged();
+        } catch (Exception e) {
+            Toast.makeText(mContext, "Add feed error in adapter", Toast.LENGTH_SHORT).show();
+        }
+    }
 }

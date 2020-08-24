@@ -52,6 +52,13 @@ public class ActivistaApprovalFragment extends Fragment {
     private activista_approval_adapter mContactAdapter;
     private Dialog mDialog;
 
+    //pagination variables
+    private boolean isLoading = true;
+    private int pastVisibleItems, visibleItemCount, totalItemCount, previousTotal = 0;
+    private int view_threshold = 0;
+    private int row_num = 30;
+    private int page_num = 1;
+
     //retrofit
     private ApiInterface apiInterface;
 
@@ -78,8 +85,34 @@ public class ActivistaApprovalFragment extends Fragment {
             mRecyclerView.setItemAnimator(new DefaultItemAnimator());
             mDialog = new Dialog(getContext());
 
+            //on scroll listener
+            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    visibleItemCount = linearLayoutManager.getChildCount();
+                    totalItemCount = linearLayoutManager.getItemCount();
+                    pastVisibleItems = linearLayoutManager.findFirstVisibleItemPosition();
+
+                    if (dy > 0) {
+                        if (isLoading) {
+                            if (totalItemCount > previousTotal) {
+                                isLoading = false;
+                                previousTotal = totalItemCount;
+                            }
+                        }
+
+                        if (!isLoading && (totalItemCount - visibleItemCount) <= (pastVisibleItems + view_threshold)) {
+                            page_num++;
+                            getActivistasPagination();
+                            isLoading = true;
+                        }
+                    }
+                }
+            });
+
             setHasOptionsMenu(true);
-            //get activistas
+            //get members
             getActivistas();
         } catch (Exception e) {
             Toast.makeText(getContext(), "Error loading UI.", Toast.LENGTH_SHORT).show();
@@ -87,10 +120,11 @@ public class ActivistaApprovalFragment extends Fragment {
         return root;
     }
 
+    //get members
     private void getActivistas() {
-        RequestBody page = RequestBody.create(MultipartBody.FORM, "1");
-        RequestBody rows = RequestBody.create(MultipartBody.FORM, "5");
-        Call<ResponseBody> activistas = apiInterface.getActivistasForApproval();
+        RequestBody page = RequestBody.create(MultipartBody.FORM, String.valueOf(page_num));
+        RequestBody rows = RequestBody.create(MultipartBody.FORM, String.valueOf(row_num));
+        Call<ResponseBody> activistas = apiInterface.getActivistasForApproval(rows,page);
         methods.showDialog(mDialog, "Loading applications...", true);
         activistas.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -101,7 +135,7 @@ public class ActivistaApprovalFragment extends Fragment {
                         String responseData = response.body().string();
                         JsonParser parser = new JsonParser();
                         String result = parser.parse(responseData).getAsString();
-                        if(result.length() == 0){
+                        if (result.length() == 0) {
                             Toast.makeText(getContext(), "No more applications.", Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -142,6 +176,26 @@ public class ActivistaApprovalFragment extends Fragment {
                             } else {
                                 contact.setmPhone(jsonObject.getString("phone"));
                             }
+                            if (jsonObject.getString("join_date").equalsIgnoreCase("")) {
+                                contact.setmJoin_date("N/A");
+                            } else {
+                                contact.setmJoin_date(jsonObject.getString("join_date"));
+                            }
+                            if (jsonObject.getString("doc_url").equalsIgnoreCase("")) {
+                                contact.setmDoc_url("N/A");
+                            } else {
+                                contact.setmDoc_url(jsonObject.getString("doc_url"));
+                            }
+                            if (jsonObject.getString("doc_path").equalsIgnoreCase("")) {
+                                contact.setmDoc_path("N/A");
+                            } else {
+                                contact.setmDoc_path(jsonObject.getString("doc_path"));
+                            }
+                            if (jsonObject.getString("doc_type").equalsIgnoreCase("")) {
+                                contact.setmDoc_type("N/A");
+                            } else {
+                                contact.setmDoc_type(jsonObject.getString("doc_type"));
+                            }
                             mList.add(contact);
                         }
 
@@ -159,7 +213,106 @@ public class ActivistaApprovalFragment extends Fragment {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 methods.showDialog(mDialog, "Dismiss", false);
-                methods.showAlert("Failure", t.toString(), getContext());
+                methods.showAlert("Failure", "Request failed.Check your internet connection.", getContext());
+            }
+        });
+    }
+
+    //get more members
+    private void getActivistasPagination() {
+        RequestBody page = RequestBody.create(MultipartBody.FORM, String.valueOf(page_num));
+        RequestBody rows = RequestBody.create(MultipartBody.FORM, String.valueOf(row_num));
+        Call<ResponseBody> activistas = apiInterface.getActivistasForApproval(rows,page);
+        methods.showDialog(mDialog, "Loading applications...", true);
+        activistas.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    methods.showDialog(mDialog, "Dismiss", false);
+                    if (response.isSuccessful()) {
+                        String responseData = response.body().string();
+                        JsonParser parser = new JsonParser();
+                        String result = parser.parse(responseData).getAsString();
+                        if (result.length() == 0) {
+                            Toast.makeText(getContext(), "No more applications.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        JSONArray array = new JSONArray(result);
+                        List<contact> list = new ArrayList<>();
+                        contact contact;
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject jsonObject = array.getJSONObject(i);
+                            contact = new contact();
+                            contact.setmContactID(jsonObject.getString("id"));
+                            contact.setmName(jsonObject.getString("name"));
+                            contact.setmSurname(jsonObject.getString("surname"));
+                            contact.setmDob(jsonObject.getString("dob"));
+                            contact.setmGender(jsonObject.getString("gender"));
+                            contact.setmOccupation(jsonObject.getString("occupation"));
+                            contact.setmProvid(jsonObject.getString("provid"));
+                            contact.setmDisid(jsonObject.getString("disid"));
+                            contact.setmAccountNo(jsonObject.getString("accno"));
+                            contact.setmProfileUrl(jsonObject.getString("profile"));
+                            contact.setmStatus(jsonObject.getString("approved"));
+                            if (jsonObject.getString("email").equalsIgnoreCase("")) {
+                                contact.setmEmail("N/A");
+                            } else {
+                                contact.setmEmail(jsonObject.getString("email"));
+                            }
+                            if (jsonObject.getString("biography").equalsIgnoreCase("")) {
+                                contact.setmBio("N/A");
+                            } else {
+                                contact.setmBio(jsonObject.getString("biography"));
+                            }
+                            if (jsonObject.getString("isdobpublic").equalsIgnoreCase("")) {
+                                contact.setmDobPublic("N/A");
+                            } else {
+                                contact.setmDobPublic(jsonObject.getString("isdobpublic"));
+                            }
+                            if (jsonObject.getString("phone").equalsIgnoreCase("")) {
+                                contact.setmPhone("N/A");
+                            } else {
+                                contact.setmPhone(jsonObject.getString("phone"));
+                            }
+                            if (jsonObject.getString("join_date").equalsIgnoreCase("")) {
+                                contact.setmJoin_date("N/A");
+                            } else {
+                                contact.setmJoin_date(jsonObject.getString("join_date"));
+                            }
+                            if (jsonObject.getString("doc_url").equalsIgnoreCase("")) {
+                                contact.setmDoc_url("N/A");
+                            } else {
+                                contact.setmDoc_url(jsonObject.getString("doc_url"));
+                            }
+                            if (jsonObject.getString("doc_path").equalsIgnoreCase("")) {
+                                contact.setmDoc_path("N/A");
+                            } else {
+                                contact.setmDoc_path(jsonObject.getString("doc_path"));
+                            }
+                            if (jsonObject.getString("doc_type").equalsIgnoreCase("")) {
+                                contact.setmDoc_type("N/A");
+                            } else {
+                                contact.setmDoc_type(jsonObject.getString("doc_type"));
+                            }
+                            list.add(contact);
+                        }
+
+                        //add the new members to the list
+                        mContactAdapter.addMember(list);
+
+                    } else {
+                        Toast.makeText(getContext(), "Request unsuccessful", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    System.out.println(e);
+                    methods.showAlert("Error", e.toString(), getContext());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                methods.showDialog(mDialog, "Dismiss", false);
+                methods.showAlert("Failure", "Request failed.Check your internet connection.", getContext());
             }
         });
     }

@@ -194,7 +194,7 @@ public class UploadOpportunityFragment extends Fragment {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     try {
                         methods.showDialog(mDialog, "dismiss", false);
-                        methods.showAlert("Request failed", "Request failed " + t.toString(), getContext());
+                        methods.showRequestFailedDialog(getContext());
                     } catch (Exception e) {
                         Toast.makeText(getContext(), "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }

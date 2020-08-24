@@ -21,4 +21,10 @@
         android:orderInCategory="100"
         android:title="Delete"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_identity_verification"
+        android:orderInCategory="100"
+        android:title="Identity Doc"
+        app:showAsAction="never" />
 </menu>

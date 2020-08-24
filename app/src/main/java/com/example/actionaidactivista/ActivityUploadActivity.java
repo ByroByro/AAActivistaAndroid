@@ -21,7 +21,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -34,7 +33,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -43,12 +41,9 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.actionaidactivista.adapters.feed_adapter;
-import com.example.actionaidactivista.models.feed;
 import com.example.actionaidactivista.navigation.MainBottomNavActivity;
 import com.example.actionaidactivista.retrofit.ApiClient;
 import com.example.actionaidactivista.retrofit.ApiInterface;
-import com.example.actionaidactivista.search.custom_search;
 import com.example.actionaidactivista.search.search_adapter;
 import com.example.actionaidactivista.search.search_model;
 import com.google.android.material.textfield.TextInputEditText;
@@ -201,7 +196,7 @@ public class ActivityUploadActivity extends Fragment {
                     String date = mDate.getText().toString().trim();
                     String type = mmimeType.getSelectedItem().toString();
                     String activity_type = mActivityType.getSelectedItem().toString();
-                    if(mFilepathUri == null && !type.equalsIgnoreCase("text")){
+                    if (mFilepathUri == null && !type.equalsIgnoreCase("text")) {
                         Toast.makeText(getContext(), "Select file", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -239,9 +234,9 @@ public class ActivityUploadActivity extends Fragment {
 
                     String dtePosted = methods.changeDateFormat(date);
                     if (mmimeType.getSelectedItemId() == 1) {
-                        postTextActivity(description, dtePosted, fileType, mimeType, intType, content, userid, accno, location, "N/A", participants,activity_type);
+                        postTextActivity(description, dtePosted, fileType, mimeType, intType, content, userid, accno, location, "N/A", participants, activity_type);
                     } else {
-                        postBinaryActivity(description, dtePosted, fileType, mimeType, intType, file, mFilepathUri, userid, accno, location, "N/A", participants,activity_type);
+                        postBinaryActivity(description, dtePosted, fileType, mimeType, intType, file, mFilepathUri, userid, accno, location, "N/A", participants, activity_type);
                     }
 
                 } catch (Exception e) {
@@ -317,7 +312,7 @@ public class ActivityUploadActivity extends Fragment {
 
                         @Override
                         public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                            String datenow = null;
+                            String datenow;
                             if (dayOfMonth > 9 && (month + 1) < 10) {
                                 datenow = dayOfMonth + "-0" + (month + 1) + "-" + year;
                             } else if (dayOfMonth < 10 && (month + 1) > 9) {
@@ -612,7 +607,7 @@ public class ActivityUploadActivity extends Fragment {
     /*
      * performs post text data to server
      */
-    private void postTextActivity(String des, String date, String ftyp, String mime, String intType, String content, String id, String accno, String loca, String geoloca, String tags,String act_type) {
+    private void postTextActivity(String des, String date, String ftyp, String mime, String intType, String content, String id, String accno, String loca, String geoloca, String tags, String act_type) {
         try {
             RequestBody dscr = RequestBody.create(MultipartBody.FORM, des);
             RequestBody dat = RequestBody.create(MultipartBody.FORM, date);
@@ -627,7 +622,7 @@ public class ActivityUploadActivity extends Fragment {
             RequestBody parts = RequestBody.create(MultipartBody.FORM, tags);
             RequestBody activity = RequestBody.create(MultipartBody.FORM, act_type);
 
-            Call<ResponseBody> text = apiInterface.PostTextFeed(dscr, dat, filetype, mimetyp, intTyp, cont, userid, acc, location, geolocation, parts,activity);
+            Call<ResponseBody> text = apiInterface.PostTextFeed(dscr, dat, filetype, mimetyp, intTyp, cont, userid, acc, location, geolocation, parts, activity);
             methods.showDialog(mDialog, "Posting text feed...", true);
             text.enqueue(new Callback<ResponseBody>() {
                 @Override
@@ -653,7 +648,7 @@ public class ActivityUploadActivity extends Fragment {
                         } else if (message.equalsIgnoreCase("Error")) {
                             methods.showAlert("Response", "Server error.", getContext());
                         } else if (message.equalsIgnoreCase("Exist")) {
-                            methods.showAlert("Response", "There is another opportunity with the same details.", getContext());
+                            methods.showAlert("Response", "There is another activity with the same details.", getContext());
                         } else if (message.equalsIgnoreCase("Account Inactive")) {
                             methods.showAlert("Response", "Your account is deactivated.Contact your admin(s).", getContext());
                         } else if (message.equalsIgnoreCase("alumni")) {
@@ -661,8 +656,9 @@ public class ActivityUploadActivity extends Fragment {
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putString(RegistrationActivity.Level, "alumni");
                             editor.apply();
+                        }else if (message.equalsIgnoreCase("3 months have lapsed")) {
+                            methods.showAlert("Response", "Your account has been deactivated because of 90 days of inactivity.Contact your admin(s).", getContext());
                         }
-                        //Toast.makeText(RegistrationActivity.this, result, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
                         Toast.makeText(getContext(), "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }
@@ -672,7 +668,8 @@ public class ActivityUploadActivity extends Fragment {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     try {
                         methods.showDialog(mDialog, "dismiss", false);
-                        methods.showAlert("Request failed", "Request failed " + t.toString(), getContext());
+                        methods.showRequestFailedDialog(getContext());
+                        //methods.showAlert("Request failed", "Request failed " + t.toString(), getContext());
                     } catch (Exception e) {
                         Toast.makeText(getContext(), "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }
@@ -686,7 +683,7 @@ public class ActivityUploadActivity extends Fragment {
     /*
      * performs post binary data to server
      */
-    private void postBinaryActivity(String des, String date, String ftyp, String mime, String intType, File file, Uri uri, String id, String accno, String loca, String geoloca, String tags,String act_type) {
+    private void postBinaryActivity(String des, String date, String ftyp, String mime, String intType, File file, Uri uri, String id, String accno, String loca, String geoloca, String tags, String act_type) {
         try {
             //check if its binary upload and uri is not null
             if (mFilepathUri == null && mmimeType.getSelectedItemId() == 1) {
@@ -713,7 +710,7 @@ public class ActivityUploadActivity extends Fragment {
 
             MultipartBody.Part actual = MultipartBody.Part.createFormData("file", file.getName(), the_file);
 
-            Call<ResponseBody> binary = apiInterface.PostMediaFeed(dscr, dat, filetype, mimetyp, intTyp, userid, acc, actual, location, geolocation, parts,activity);
+            Call<ResponseBody> binary = apiInterface.PostMediaFeed(dscr, dat, filetype, mimetyp, intTyp, userid, acc, actual, location, geolocation, parts, activity);
             methods.showDialog(mDialog, "Posting media feed...", true);
             binary.enqueue(new Callback<ResponseBody>() {
                 @Override
@@ -746,8 +743,9 @@ public class ActivityUploadActivity extends Fragment {
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putString(RegistrationActivity.Level, "alumni");
                             editor.apply();
+                        } else if (message.equalsIgnoreCase("3 months have lapsed")) {
+                            methods.showAlert("Response", "Your account has been deactivated because of 90 days of inactivity.Contact your admin(s).", getContext());
                         }
-                        //Toast.makeText(RegistrationActivity.this, result, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
                         Toast.makeText(getContext(), "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }
@@ -757,7 +755,7 @@ public class ActivityUploadActivity extends Fragment {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     try {
                         methods.showDialog(mDialog, "dismiss", false);
-                        methods.showAlert("Request failed", "Request failed " + t.toString(), getContext());
+                        methods.showRequestFailedDialog(getContext());
                     } catch (Exception e) {
                         Toast.makeText(getContext(), "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }

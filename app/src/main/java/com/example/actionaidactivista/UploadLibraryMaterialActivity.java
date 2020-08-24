@@ -397,7 +397,7 @@ public class UploadLibraryMaterialActivity extends AppCompatActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     try {
                         methods.showDialog(mDialog, "dismiss", false);
-                        methods.showAlert("Request failed", "Request failed " + t.toString(), UploadLibraryMaterialActivity.this);
+                        methods.showRequestFailedDialog(UploadLibraryMaterialActivity.this);
                     } catch (Exception e) {
                         Toast.makeText(UploadLibraryMaterialActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }

@@ -98,6 +98,9 @@ public class FeedsMonitoringActivity extends AppCompatActivity {
                     case R.id.action_by_feeds_liking:
                         getTopUsers(rows,"byfeedlikes");
                         break;
+                    case R.id.action_by_most_comments:
+                        getTopUsers(rows,"bycommentsmade");
+                        break;
                 }
             }
         }catch (Exception e){
@@ -144,6 +147,11 @@ public class FeedsMonitoringActivity extends AppCompatActivity {
                             user.setSname(jsonObject.getString("lname"));
                             user.setUserid(jsonObject.getString("userid"));
                             user.setProfile(jsonObject.getString("profile"));
+                            if(jsonObject.has("last_date")){
+                                user.setLast_date(jsonObject.getString("last_date"));
+                            }else{
+                                user.setLast_date("n/a");
+                            }
                             mList.add(user);
                         }
                         mAdapter = new feed_monitoring_adapter(mList,FeedsMonitoringActivity.this,type);
@@ -160,7 +168,7 @@ public class FeedsMonitoringActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 methods.showDialog(mDialog, "Dismiss", false);
-                methods.showAlert("Failure", t.toString(), FeedsMonitoringActivity.this);
+                methods.showRequestFailedDialog(FeedsMonitoringActivity.this);
             }
         });
     }

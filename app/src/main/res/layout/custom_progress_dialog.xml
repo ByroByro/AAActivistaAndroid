@@ -13,8 +13,8 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        app:cardUseCompatPadding="true"
-        app:cardCornerRadius="15dp">
+        app:cardCornerRadius="15dp"
+        app:cardUseCompatPadding="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -25,16 +25,17 @@
 
             <ProgressBar
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:indeterminateTint="@color/colorRed" />
 
             <TextView
+                android:id="@+id/custom_dialog_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="10dp"
                 android:text="Loading..."
                 android:textAlignment="center"
-                android:id="@+id/custom_dialog_text"
-                android:textSize="20dp"/>
+                android:textSize="20dp" />
 
         </LinearLayout>
 

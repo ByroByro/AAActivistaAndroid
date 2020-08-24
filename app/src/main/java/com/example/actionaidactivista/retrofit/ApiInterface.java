@@ -27,20 +27,34 @@ public interface ApiInterface {
             @Part("phoneno") RequestBody phoneno,
             @Part("email") RequestBody email,
             @Part("biography") RequestBody biography,
-            @Part("dob_status") RequestBody dob_status
+            @Part("dob_status") RequestBody dob_status,
+            @Part("doc_type") RequestBody doc_type,
+            @Part MultipartBody.Part file
     );
 
     //endpoint for retrieving activista list (approved)
+    @Multipart
     @POST("Activista/GetActivistas")
-    Call<ResponseBody> getActivistas();
+    Call<ResponseBody> getActivistas(
+            @Part("row_num") RequestBody row_num,
+            @Part("page_num") RequestBody page_num
+    );
 
     //endpoint for retrieving alumni list
+    @Multipart
     @POST("Activista/GetAlumni")
-    Call<ResponseBody> getAlumni();
+    Call<ResponseBody> getAlumni(
+            @Part("row_num") RequestBody row_num,
+            @Part("page_num") RequestBody page_num
+    );
 
-    //endpoint for retrieving activista list (approved)
+    //endpoint for retrieving library material
+    @Multipart
     @POST("Activista/GetLibraryMaterial")
-    Call<ResponseBody> getLibrary();
+    Call<ResponseBody> getLibrary(
+            @Part("row_num") RequestBody row_num,
+            @Part("page_num") RequestBody page_num
+    );
 
     //download library article
     @Streaming
@@ -48,8 +62,12 @@ public interface ApiInterface {
     Call<ResponseBody> downloadArticle(@Url String url);
 
     //endpoint for retrieving opportunities
+    @Multipart
     @POST("Activista/GetOpportunities")
-    Call<ResponseBody> getOpportunities();
+    Call<ResponseBody> getOpportunities(
+            @Part("row_num") RequestBody row_num,
+            @Part("page_num") RequestBody page_num
+    );
 
     //endpoint for retrieving opportunities
     @Multipart
@@ -60,16 +78,28 @@ public interface ApiInterface {
     );
 
     //endpoint for retrieving opportunities
+    @Multipart
     @POST("Feed/GetAllFeeds")
-    Call<ResponseBody> getAllFeeds();
+    Call<ResponseBody> getAllFeeds(
+            @Part("row_num") RequestBody row_num,
+            @Part("page_num") RequestBody page_num
+    );
 
     //endpoint for retrieving activistas list for approval
+    @Multipart
     @POST("Activista/GetActivistasForApproval")
-    Call<ResponseBody> getActivistasForApproval();
+    Call<ResponseBody> getActivistasForApproval(
+            @Part("row_num") RequestBody row_num,
+            @Part("page_num") RequestBody page_num
+    );
 
-    //endpoint for retrieving activistas list for approval
+    //endpoint for retrieving users list for approval
+    @Multipart
     @POST("Activista/GetActivistasForApproval")
-    Call<ResponseBody> getUsers();
+    Call<ResponseBody> getUsers(
+            @Part("row_num") RequestBody row_num,
+            @Part("page_num") RequestBody page_num
+    );
 
     //LOOK UP DATA ENDPOINTS
     //endpoint for retrieving provinces
@@ -85,8 +115,12 @@ public interface ApiInterface {
     Call<ResponseBody> getActivityTypes();
 
     //endpoint for getting
-    @GET("AdminOperations/GetReportedComments")
-    Call<ResponseBody> getReportedComments();
+    @Multipart
+    @POST("AdminOperations/GetReportedComments")
+    Call<ResponseBody> getReportedComments(
+            @Part("row_num") RequestBody row_num,
+            @Part("page_num") RequestBody page_num
+    );
 
     //endpoint for user sig nup
     @Multipart
@@ -369,14 +403,20 @@ public interface ApiInterface {
 
     //OPPORTUNITIES
     //endpoint for getting number of applications on an opportunity
+    @Multipart
     @POST("Opportunities/GetOpportunityApplications")
-    Call<ResponseBody> GetOpportunityApplications();
+    Call<ResponseBody> GetOpportunityApplications(
+            @Part("row_num") RequestBody row_num,
+            @Part("page_num") RequestBody page_num
+    );
 
     //endpoint for Applications for a particular opportunity
     @Multipart
-    @POST("Opportunities/GetApplications")
-    Call<ResponseBody> GetAplications(
-            @Part("oppid") RequestBody id
+    @POST("Opportunities/GetApplicants")
+    Call<ResponseBody> GetApplicants(
+            @Part("opp_id") RequestBody id,
+            @Part("row_num") RequestBody row_num,
+            @Part("page_num") RequestBody page_num
     );
 
     //SEARCH OPERATIONS
@@ -402,6 +442,7 @@ public interface ApiInterface {
     Call<ResponseBody> LogoutUser(
             @Part("user_id") RequestBody user_id
     );
+
     //log out admin
     @Multipart
     @POST("AuthAdmin/LogoutAdmin")

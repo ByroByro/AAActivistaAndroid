@@ -129,13 +129,12 @@ public class FeedCommentsActivity extends AppCompatActivity {
                             JsonParser parser = new JsonParser();
                             String result = parser.parse(responseData).getAsString();
                             if (result.length() == 0) {
-                                //Toast.makeText(FeedCommentsActivity.this, "No more comments.", Toast.LENGTH_SHORT).show();
-                                Snackbar.make(rootLayout, "There are no comments or no more comments", Snackbar.LENGTH_SHORT).show();
+                                Toast.makeText(FeedCommentsActivity.this, "No comments.", Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             JSONArray array = new JSONArray(result);
                             if (array.length() == 0) {
-                                Snackbar.make(rootLayout, "There are no comments or no more comments", Snackbar.LENGTH_SHORT).show();
+                                Toast.makeText(FeedCommentsActivity.this, "No comments.", Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             commentsList = new ArrayList<>();
@@ -202,13 +201,11 @@ public class FeedCommentsActivity extends AppCompatActivity {
                             JsonParser parser = new JsonParser();
                             String result = parser.parse(responseData).getAsString();
                             if (result.length() == 0) {
-                                //Toast.makeText(FeedCommentsActivity.this, "No more comments.", Toast.LENGTH_SHORT).show();
-                                Snackbar.make(rootLayout, "There are no comments or no more comments", Snackbar.LENGTH_SHORT).show();
-                                return;
+                                Toast.makeText(FeedCommentsActivity.this, "No more comments.", Toast.LENGTH_SHORT).show();
                             }
                             JSONArray array = new JSONArray(result);
                             if (array.length() == 0) {
-                                Snackbar.make(rootLayout, "There are no comments or no more comments", Snackbar.LENGTH_SHORT).show();
+                                Toast.makeText(FeedCommentsActivity.this, "No more comments.", Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             List<comment> comments = new ArrayList<>();

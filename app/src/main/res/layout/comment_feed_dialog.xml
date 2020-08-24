@@ -46,16 +46,20 @@
                     android:paddingLeft="5dp"
                     android:lines="5"
                     android:maxLines="8"
-                    android:gravity="top"/>
+                    android:gravity="top"
+                    android:textColorHint="@color/colorBlack"
+                    app:hintTextColor="@color/colorBlack"/>
 
                 <Button
-                    android:layout_width="match_parent"
+                    android:layout_width="90dp"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorRed"
-                    android:textColor="@color/colorWhite"
+                    android:layout_gravity="center"
+                    android:background="@drawable/custom_button_red"
                     android:text="Post"
                     android:textAllCaps="false"
                     android:textSize="20dp"
+                    android:textColor="@color/colorWhite"
+                    android:padding="10dp"
                     android:id="@+id/comment"
                     android:layout_marginTop="10dp"/>
 

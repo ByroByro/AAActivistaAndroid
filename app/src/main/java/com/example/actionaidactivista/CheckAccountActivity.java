@@ -110,7 +110,7 @@ public class CheckAccountActivity extends AppCompatActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     try {
                         methods.showDialog(mProgress, "...", false);
-                        methods.showAlert("Request failed", "Request failed " + t.toString(), CheckAccountActivity.this);
+                        methods.showRequestFailedDialog(CheckAccountActivity.this);
                     } catch (Exception e) {
                         Toast.makeText(CheckAccountActivity.this, "Error " + e.toString(), Toast.LENGTH_LONG).show();
                     }
